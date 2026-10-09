@@ -397,6 +397,124 @@ def edit_text_block(
     }
 
 
+# 匹配 CJK 字符（中日韩），用于回写字体选择
+_CJK_RE = re.compile(r"[\u4e00-\u9fff\u3040-\u30ff\u3130-\u318f\uac00-\ud7af]")
+
+
+def _map_edit_fontname(text: str, orig_font: Optional[str]) -> str:
+    """回写字体映射：CJK → china-s；西文按原字体名特征映射 PyMuPDF 内置字体"""
+    if _CJK_RE.search(text or ""):
+        return "china-s"
+    f = (orig_font or "").lower()
+    if any(k in f for k in ("serif", "song", "times", "ming", "garamond", "georgia", "palatino")):
+        return "tiro"
+    if any(k in f for k in ("mono", "courier", "consol")):
+        return "courier"
+    return "helv"
+
+
+def _sample_bg_color(page, rect) -> Tuple[float, float, float]:
+    """采样文本块区域背景众数色；与 page.rect 求交防边缘越界；失败回退白色"""
+    try:
+        clip = pymupdf.Rect(rect.x0 - 2, rect.y0 - 2, rect.x1 + 2, rect.y1 + 2) & page.rect
+        if clip.is_empty:
+            return (1.0, 1.0, 1.0)
+        pix = page.get_pixmap(clip=clip, dpi=72)
+        arr = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, pix.n)[:, :, :3]
+        colors, counts = np.unique(arr.reshape(-1, 3), axis=0, return_counts=True)
+        dom = colors[int(counts.argmax())]
+        return (round(dom[0] / 255, 3), round(dom[1] / 255, 3), round(dom[2] / 255, 3))
+    except Exception:
+        return (1.0, 1.0, 1.0)
+
+
+def edit_text_batch(input_path: str, output_path: str, edits: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    批量正文编辑：一次子进程调用处理多个文本块。
+    每块流程：背景采样 → 采样色 redact 擦除（图片像素级保护）→ 真实字体/字号/颜色回写。
+    逐块返回结果，部分失败不影响其余块。
+    """
+    if not os.path.exists(input_path):
+        return {"success": False, "error": "输入文件不存在"}
+    if not edits:
+        return {"success": False, "error": "编辑列表为空"}
+
+    doc = pymupdf.open(input_path)
+    results: List[Dict[str, Any]] = []
+
+    # 按页分组，同页共享一次 apply_redactions
+    by_page: Dict[int, List[Tuple[int, Dict[str, Any]]]] = {}
+    for i, e in enumerate(edits):
+        try:
+            pg = int(e.get("page", 1))
+        except (TypeError, ValueError):
+            results.append({"index": i, "ok": False, "error": "page 字段无效"})
+            continue
+        by_page.setdefault(pg, []).append((i, e))
+
+    for page_num in sorted(by_page.keys()):
+        items = by_page[page_num]
+        if page_num < 1 or page_num > len(doc):
+            for i, _e in items:
+                results.append({"index": i, "ok": False, "error": "页码超出范围"})
+            continue
+        page = doc[page_num - 1]
+
+        # 阶段 1：校验矩形、采样背景、添加 redact 标注
+        prepared = []
+        for i, e in items:
+            try:
+                rect = pymupdf.Rect(e["rect"])
+                if rect.is_empty or (rect & page.rect).is_empty:
+                    results.append({"index": i, "ok": False, "error": "矩形超出页面范围"})
+                    continue
+                bg = _sample_bg_color(page, rect)
+                page.add_redact_annot(rect, fill=bg)
+                prepared.append((i, e, rect))
+            except Exception as ex:
+                results.append({"index": i, "ok": False, "error": f"矩形无效: {ex}"})
+
+        # 阶段 2：整页一次性应用擦除（图片区域像素级擦除，不整块移除图片）
+        if prepared:
+            page.apply_redactions(images=pymupdf.PDF_REDACT_IMAGE_PIXELS)
+
+        # 阶段 3：按真实属性回写
+        for i, e, rect in prepared:
+            new_text = str(e.get("newText", ""))
+            font_size = float(e.get("fontSize") or max(9.0, min(18.0, (rect.y1 - rect.y0) * 0.7)))
+            color_arr = e.get("color") or [0.1, 0.1, 0.1]
+            color = (float(color_arr[0]), float(color_arr[1]), float(color_arr[2]))
+            fontname = _map_edit_fontname(new_text, e.get("fontName"))
+            warning = None
+            try:
+                size = font_size
+                rc = page.insert_textbox(rect, new_text, fontsize=size, fontname=fontname,
+                                         color=color, align=pymupdf.TEXT_ALIGN_LEFT)
+                while rc < 0 and size > 6.0:
+                    size = round(size * 0.9, 1)
+                    rc = page.insert_textbox(rect, new_text, fontsize=size, fontname=fontname,
+                                             color=color, align=pymupdf.TEXT_ALIGN_LEFT)
+                if rc < 0:
+                    raise RuntimeError("文本溢出且无法通过缩小字号容纳")
+                if size < font_size:
+                    warning = "文本溢出，已缩小字号"
+                results.append({"index": i, "ok": True, "warning": warning})
+            except Exception as ex:
+                try:
+                    # 兜底基线插入（与现有 edit_text_block 兜底一致：块左下角基线）
+                    page.insert_text(pymupdf.Point(rect.x0, rect.y1 - 4), new_text,
+                                     fontsize=font_size, fontname=fontname, color=color)
+                    results.append({"index": i, "ok": True, "warning": f"兜底插入: {ex}"})
+                except Exception as ex2:
+                    results.append({"index": i, "ok": False, "error": str(ex2)})
+
+    results.sort(key=lambda r: r["index"])
+    os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
+    doc.save(output_path, garbage=3, deflate=True)
+    doc.close()
+    return {"success": True, "outputPath": output_path, "results": results}
+
+
 # -------------------------------------------------------------
 # 4. 物理脱敏 (True Redaction)：永久物理抹除与正则敏感词抹除
 # -------------------------------------------------------------
@@ -2467,6 +2585,7 @@ def main():
     parser.add_argument("--rect", help="矩形坐标，JSON 数组 [x0, y0, x1, y1]")
     parser.add_argument("--rects", help="多个矩形坐标，JSON 嵌套数组")
     parser.add_argument("--text", help="文本内容")
+    parser.add_argument("--edits", help="批量正文编辑项，JSON 数组")
     parser.add_argument("--fontSize", type=float)
     parser.add_argument("--pattern", help="敏感词或正则表达式")
     parser.add_argument("--annotType", help="批注类型: highlight, underline, strikeout, ink, note")
@@ -2539,6 +2658,12 @@ def main():
     if args.action == "edit_text":
         rect = json.loads(args.rect) if args.rect else [0, 0, 0, 0]
         res = edit_text_block(args.input, args.output, args.page, rect, args.text, args.fontSize)
+        print(json.dumps(res))
+        return
+
+    if args.action == "edit_text_batch":
+        edits = json.loads(args.edits) if args.edits else []
+        res = edit_text_batch(args.input, args.output, edits)
         print(json.dumps(res))
         return
 
