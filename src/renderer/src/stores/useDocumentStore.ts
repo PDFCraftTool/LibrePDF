@@ -441,9 +441,14 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
         }
       })
 
+      // 溢出缩小字号等 warning 属于成功但需提示的情况（spec §4.5）
+      const warnCount = (res.results || []).filter((r) => r.ok && r.warning).length
       const summary =
         tr(`成功应用 ${applied} 处修改`, `${applied} edit(s) applied`) +
-        (kept.length > 0 ? tr(`，${kept.length} 处失败`, `, ${kept.length} failed`) : '')
+        (kept.length > 0 ? tr(`，${kept.length} 处失败`, `, ${kept.length} failed`) : '') +
+        (warnCount > 0
+          ? tr(`，${warnCount} 处因溢出自动缩小字号`, `, ${warnCount} auto-shrunk for overflow`)
+          : '')
       if (kept.length > 0) {
         toast.error(tr('部分文字修改失败', 'Some edits failed'), summary)
       } else {
