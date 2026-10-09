@@ -9,3 +9,4 @@ __pycache__/
 .DS_Store
 tests/fixtures/*
 !tests/fixtures/.gitkeep
+tests/fixtures_bento/
