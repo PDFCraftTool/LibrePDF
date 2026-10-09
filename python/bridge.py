@@ -273,25 +273,47 @@ def get_page_text_blocks(input_path: str, page_num: int) -> Dict[str, Any]:
 
     page = doc[page_num - 1]
     blocks_data = []
-    
-    # 提取 block 结构: (x0, y0, x1, y1, text, block_no, block_type)
-    raw_blocks = page.get_text("blocks")
-    for idx, b in enumerate(raw_blocks):
-        x0, y0, x1, y1, text, block_no, block_type = b
-        # block_type == 0 为文本
-        if block_type == 0 and text.strip():
-            # 估算字号
-            lines = [l for l in text.split("\n") if l.strip()]
-            line_count = max(1, len(lines))
-            height = y1 - y0
-            est_font_size = max(8.0, min(24.0, (height / line_count) * 0.75))
 
-            blocks_data.append({
-                "id": f"blk_{page_num}_{idx}",
-                "rect": [round(x0, 2), round(y0, 2), round(x1, 2), round(y1, 2)],
-                "text": text.rstrip("\n"),
-                "fontSize": round(est_font_size, 1)
-            })
+    # 使用 dict 结构获取 span 级真实字体属性（替代 blocks 模式的启发式估算）
+    data = page.get_text("dict")
+    for b in data.get("blocks", []):
+        if b.get("type") != 0:
+            continue
+        x0, y0, x1, y1 = b["bbox"]
+        spans = []
+        for line in b.get("lines", []):
+            for sp in line.get("spans", []):
+                if sp.get("text", "").strip():
+                    spans.append(sp)
+        if not spans:
+            continue
+        text = "\n".join(
+            "".join(sp.get("text", "") for sp in line.get("spans", []))
+            for line in b.get("lines", [])
+        ).rstrip()
+        if not text.strip():
+            continue
+
+        # 按字符数占比选出主字体，取其真实字号与颜色
+        font_stats: Dict[str, Dict[str, Any]] = {}
+        for sp in spans:
+            fname = re.sub(r"^[A-Z]{6}\+", "", sp.get("font", ""))  # 剥离子集前缀
+            if fname not in font_stats:
+                font_stats[fname] = {"chars": 0, "size": sp.get("size", 12), "color": sp.get("color", 0)}
+            font_stats[fname]["chars"] += len(sp.get("text", ""))
+        main_name, main_info = max(font_stats.items(), key=lambda kv: kv[1]["chars"])
+        ci = int(main_info["color"])
+        color = [round(((ci >> 16) & 255) / 255, 3), round(((ci >> 8) & 255) / 255, 3), round((ci & 255) / 255, 3)]
+
+        blocks_data.append({
+            # 稳定坐标键：重提取后不变，前端绿框覆盖不再错位
+            "id": f"{page_num}-{round(x0)}-{round(y0)}-{round(x1)}-{round(y1)}",
+            "rect": [round(x0, 2), round(y0, 2), round(x1, 2), round(y1, 2)],
+            "text": text,
+            "fontName": main_name,
+            "fontSize": round(float(main_info["size"]), 1),
+            "color": color
+        })
 
     page_width = page.rect.width
     page_height = page.rect.height
