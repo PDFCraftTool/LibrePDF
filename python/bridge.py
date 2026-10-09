@@ -440,11 +440,17 @@ def edit_text_batch(input_path: str, output_path: str, edits: List[Dict[str, Any
         return {"success": False, "error": "编辑列表为空"}
 
     doc = pymupdf.open(input_path)
+    if doc.needs_pass:
+        doc.close()
+        return {"success": False, "error": "文档已加密，请先解密后再编辑"}
     results: List[Dict[str, Any]] = []
 
     # 按页分组，同页共享一次 apply_redactions
     by_page: Dict[int, List[Tuple[int, Dict[str, Any]]]] = {}
     for i, e in enumerate(edits):
+        if not isinstance(e, dict):
+            results.append({"index": i, "ok": False, "error": "编辑项格式无效"})
+            continue
         try:
             pg = int(e.get("page", 1))
         except (TypeError, ValueError):
@@ -460,8 +466,8 @@ def edit_text_batch(input_path: str, output_path: str, edits: List[Dict[str, Any
             continue
         page = doc[page_num - 1]
 
-        # 阶段 1：校验矩形、采样背景、添加 redact 标注
-        prepared = []
+        # 阶段 1：校验矩形、采样背景（两遍处理，避免 pending redact 标注边框污染相邻块采样）
+        sampled = []
         for i, e in items:
             try:
                 rect = pymupdf.Rect(e["rect"])
@@ -469,6 +475,12 @@ def edit_text_batch(input_path: str, output_path: str, edits: List[Dict[str, Any
                     results.append({"index": i, "ok": False, "error": "矩形超出页面范围"})
                     continue
                 bg = _sample_bg_color(page, rect)
+                sampled.append((i, e, rect, bg))
+            except Exception as ex:
+                results.append({"index": i, "ok": False, "error": f"矩形无效: {ex}"})
+        prepared = []
+        for i, e, rect, bg in sampled:
+            try:
                 page.add_redact_annot(rect, fill=bg)
                 prepared.append((i, e, rect))
             except Exception as ex:
@@ -480,12 +492,16 @@ def edit_text_batch(input_path: str, output_path: str, edits: List[Dict[str, Any
 
         # 阶段 3：按真实属性回写
         for i, e, rect in prepared:
-            new_text = str(e.get("newText", ""))
-            font_size = float(e.get("fontSize") or max(9.0, min(18.0, (rect.y1 - rect.y0) * 0.7)))
-            color_arr = e.get("color") or [0.1, 0.1, 0.1]
-            color = (float(color_arr[0]), float(color_arr[1]), float(color_arr[2]))
-            fontname = _map_edit_fontname(new_text, e.get("fontName"))
             warning = None
+            try:
+                new_text = e.get("newText") or ""
+                font_size = float(e.get("fontSize") or max(9.0, min(18.0, (rect.y1 - rect.y0) * 0.7)))
+                color_arr = e.get("color") or [0.1, 0.1, 0.1]
+                color = (float(color_arr[0]), float(color_arr[1]), float(color_arr[2]))
+                fontname = _map_edit_fontname(new_text, e.get("fontName"))
+            except Exception as ex:
+                results.append({"index": i, "ok": False, "error": f"属性字段无效: {ex}"})
+                continue
             try:
                 size = font_size
                 rc = page.insert_textbox(rect, new_text, fontsize=size, fontname=fontname,
