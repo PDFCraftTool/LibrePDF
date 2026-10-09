@@ -95,6 +95,7 @@ PDF.js 客户端回退路径（Python 不可用时）：无法获得字体名/�
 **逐块处理流程**：
 
 1. **背景采样**：`page.get_pixmap(clip=rect 外扩 2px 后与 page.rect 求交, dpi=72)` 渲染该区域（含原文字，文字像素占比低不影响众数），取像素众数色作为背景色；若矩形与任一图片 bbox 相交，或众数色与白色差异明显，则用采样色，否则用白色。采样失败回退白色。
+   **实施偏离记录（Task 2 评审确认）**：实现简化为「始终采用众数色」——白底时众数即白，扫描件时众数为纸色反而更准；且采样与 add_redact_annot 拆为两遍执行，避免 pending 标注边框污染相邻块采样。另按评审补充：单项属性畸形/非 dict 项逐块隔离报错不炸整批，加密文档显式返回「文档已加密，请先解密后再编辑」。
 2. **擦除**：`add_redact_annot(rect, fill=采样背景色)`，全部标注添加完后对该页统一 `apply_redactions(images=pymupdf.PDF_REDACT_IMAGE_PIXELS)`（图片区域像素级擦除，不整块移除图片）。同页多个编辑共享一次 apply，避免重复处理。
 3. **回写**：`insert_textbox(rect, newText, fontsize=真实字号, color=真实颜色, fontname=按规则映射, align=左对齐)`；溢出（返回值 < 0）时按 0.9 系数逐步缩小字号重试，最小至 6pt，仍失败则记录该块 `warning: "文本溢出，已缩小字号"`。
 4. **字体映射规则**：文本含 CJK 字符（`\u4e00-\u9fff\u3040-\u30ff` 等）→ `china-s`；否则按原字体名关键词：含 `serif`/`song`/`times`/`ming` → `tiro`，含 `mono`/`courier` → `courier`，其余或 null → `helv`。（PyMuPDF 内置字体，无嵌入成本。）
@@ -113,6 +114,8 @@ PDF.js 客户端回退路径（Python 不可用时）：无法获得字体名/�
 - `pythonService.editTextBatch(inputPath, outputPath, edits)`：与现有方法同构，spawn 子进程传 `--action edit_text_batch`，复用现有 stdout JSON 提取与错误处理；`edits` 经 `JSON.stringify` 作为单个 argv 传入（与现有 `--rects` 模式一致）。
 - **分批协议**（Windows argv 上限约 32K）：edits 超过 200 项时由 pythonService 内部切分为多批，调用方无感知。批次串联：第 i 批的 output 即第 i+1 批的 input（中间批次写临时文件，最后一批写最终 outputPath）。`results[].index` 统一换算为**全局索引**后合并返回。中途某批整体失败：立即停止后续批次，已成功批次的结果照常返回，未处理项不出现在 results 中——前端据"results 覆盖到哪个全局索引"把已确认成功的项出队、其余（失败 + 未处理）全部保留队列。
 - `index.ts` 注册 `ipcMain.handle('pdf:editTextBatch', ...)`；`preload/index.ts` 对应暴露；`shared/types.ts` **新建** `TextEditItem`、`TextEditResult`、`TextBlockInfo` 三个接口（现状不存在 `TextBlockInfo`，`pythonGetTextBlocks` 签名与 store 的 `pageTextBlocks` 均为 `any`），并同步收紧这两处签名为 `TextBlockInfo[]`，避免新类型形同虚设。
+
+   **实施偏离记录（Task 3 评审 + 最终集成评审确认）**：① 实际 IPC 通道名为 `python:editTextBatch`（与该文件既有 `python:*` 通道命名一致）。② 分批触发条件从「纯计数 200 项」升级为「计数 ≤ EDIT_BATCH_LIMIT(200) 且序列化字节 ≤ EDIT_BATCH_BYTES(20000)」的双限贪心分批（长文本 200 项仍可能超 argv 上限）；wire 载荷剔除 Python 侧不需要的 `blockId/oldText` 字段；临时文件命名改为 `pdfopen_${ts}_${rand}.pdf` 以兼容启动清扫正则并避免并发同名碰撞。③ 中途某批整体失败时采取**保守语义**：返回 `success:false` + 已成功批次的部分 results，但前端不重载、不出队，整个队列原样保留供重试；成功批次的中间产物（临时文件）随 finally 清理丢弃。理由：避免「文档已部分改写但 UI 未同步」的中间态，重试幂等且无数据丢失风险（源文件从未被就地修改）。
 
 ### 4.4 前端队列与交互（useDocumentStore + PDFViewer）
 

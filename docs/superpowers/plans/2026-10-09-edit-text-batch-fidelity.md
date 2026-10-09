@@ -24,7 +24,7 @@
 **Files:**
 - Create: `.gitignore`
 
-- [ ] **Step 1: 写 .gitignore**
+- [x] **Step 1: 写 .gitignore**
 
 ```gitignore
 node_modules/
@@ -42,7 +42,7 @@ tests/fixtures/
 
 注意：`tests/fixtures/` 下有测试自生成的样例文件，整体忽略后补一个空占位：`touch tests/fixtures/.gitkeep`（Windows 下 `type nul > tests/fixtures/.gitkeep`）。
 
-- [ ] **Step 2: 初始化并提交基线**
+- [x] **Step 2: 初始化并提交基线**
 
 ```bash
 git init
@@ -59,7 +59,7 @@ git commit -m "chore: baseline before edit-text batch/fidelity feature"
 **Files:**
 - Modify: `python/bridge.py`（`get_page_text_blocks`，约 263-310 行）
 
-- [ ] **Step 1: 写失败测试脚本**
+- [x] **Step 1: 写失败测试脚本**
 
 创建 `tests/tmp_check_blocks.py`（临时文件，Task 结束时删除）：
 
@@ -92,7 +92,7 @@ print("OK get_page_text_blocks")
 os.remove(FIX)
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 ```bash
 python tests/tmp_check_blocks.py
@@ -100,7 +100,7 @@ python tests/tmp_check_blocks.py
 
 预期：FAIL（fontSize 是估算值 ~16.x 或 color 键不存在 KeyError）。
 
-- [ ] **Step 3: 重写 get_page_text_blocks**
+- [x] **Step 3: 重写 get_page_text_blocks**
 
 在 `python/bridge.py` 中，将 `get_page_text_blocks` 的函数体从 `page = doc[page_num - 1]` 到 `doc.close()` 之前（即 `blocks_data = []` 开始的提取循环整段）替换为：
 
@@ -152,7 +152,7 @@ python tests/tmp_check_blocks.py
 
 保持函数结尾的 `page_width/page_height/doc.close()/return {...}` 原样不动（返回结构中 `blocks` 键不变，仅块内新增字段）。
 
-- [ ] **Step 4: 运行确认通过**
+- [x] **Step 4: 运行确认通过**
 
 ```bash
 python tests/tmp_check_blocks.py
@@ -160,7 +160,7 @@ python tests/tmp_check_blocks.py
 
 预期：输出 `OK get_page_text_blocks`。
 
-- [ ] **Step 5: 确认现有 action 名与分发不受影响**
+- [x] **Step 5: 确认现有 action 名与分发不受影响**
 
 ```bash
 python python/bridge.py --action get_text_blocks --input tests/fixtures/sample_doc.pdf --page 1 | python -c "import sys,json; d=json.load(sys.stdin); print(d['success'], len(d['blocks']), list(d['blocks'][0].keys()))"
@@ -168,7 +168,7 @@ python python/bridge.py --action get_text_blocks --input tests/fixtures/sample_d
 
 预期：`True N [...]`，keys 含 `id rect text fontName fontSize color`。
 
-- [ ] **Step 6: 删除临时脚本并提交**
+- [x] **Step 6: 删除临时脚本并提交**
 
 ```bash
 rm tests/tmp_check_blocks.py
@@ -183,7 +183,7 @@ git commit -m "feat(bridge): span-level font attributes and stable block ids in 
 **Files:**
 - Modify: `python/bridge.py`（新增函数 + argparse `--edits` + 分发分支）
 
-- [ ] **Step 1: 写失败测试脚本**
+- [x] **Step 1: 写失败测试脚本**
 
 创建 `tests/tmp_check_batch.py`（临时文件，Task 结束时删除）：
 
@@ -247,7 +247,7 @@ print("OK edit_text_batch")
 os.remove(FIX); os.remove(OUT)
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 ```bash
 python tests/tmp_check_batch.py
@@ -255,7 +255,7 @@ python tests/tmp_check_batch.py
 
 预期：FAIL，报 `未知的操作类型: edit_text_batch`。
 
-- [ ] **Step 3: 在 bridge.py 中实现**
+- [x] **Step 3: 在 bridge.py 中实现**
 
 3a. 在 `edit_text_block` 函数之后（约 366 行 `# 4. 物理脱敏` 注释之前）插入：
 
@@ -394,7 +394,7 @@ def edit_text_batch(input_path: str, output_path: str, edits: List[Dict[str, Any
         return
 ```
 
-- [ ] **Step 4: 运行确认通过**
+- [x] **Step 4: 运行确认通过**
 
 ```bash
 python tests/tmp_check_batch.py
@@ -402,7 +402,7 @@ python tests/tmp_check_batch.py
 
 预期：输出 `OK edit_text_batch`。
 
-- [ ] **Step 5: 回归现有脱敏测试不受影响**
+- [x] **Step 5: 回归现有脱敏测试不受影响**
 
 ```bash
 npm run test:sidecar
@@ -410,7 +410,7 @@ npm run test:sidecar
 
 预期：3 项全部 PASS（bridge.py 顶部语法与既有 action 未被破坏）。
 
-- [ ] **Step 6: 删除临时脚本并提交**
+- [x] **Step 6: 删除临时脚本并提交**
 
 ```bash
 rm tests/tmp_check_batch.py
@@ -428,7 +428,7 @@ git commit -m "feat(bridge): add edit_text_batch action with background sampling
 - Modify: `src/main/index.ts`（`python:editText` handler 之后，约 544 行）
 - Modify: `src/preload/index.ts`（`pythonEditText` 之后，约 54 行）
 
-- [ ] **Step 1: shared/types.ts 增加类型并收紧签名**
+- [x] **Step 1: shared/types.ts 增加类型并收紧签名**
 
 在 `ElectronAPI` 接口（`pythonGetTextBlocks` 所在接口）之前合适位置新增：
 
@@ -474,7 +474,7 @@ export interface TextEditResult {
 
 （`pythonEditText` 保留不动，AI ReAct 链路仍在用。）
 
-- [ ] **Step 2: pythonService.ts 新增 editTextBatch（含分批）**
+- [x] **Step 2: pythonService.ts 新增 editTextBatch（含分批）**
 
 确认文件顶部已有 `import path from 'node:path'`（如无则补），在 `editText` 方法之后插入：
 
@@ -558,7 +558,7 @@ import os from 'node:os'
 import fsSync from 'node:fs'
 ```
 
-- [ ] **Step 3: index.ts 注册 IPC handler**
+- [x] **Step 3: index.ts 注册 IPC handler**
 
 在 `ipcMain.handle('python:editText', ...)`（约 544 行）之后加（pythonService 实例名以该文件现有写法为准）：
 
@@ -568,7 +568,7 @@ import fsSync from 'node:fs'
   })
 ```
 
-- [ ] **Step 4: preload/index.ts 暴露**
+- [x] **Step 4: preload/index.ts 暴露**
 
 在 `pythonEditText` 条目之后加：
 
@@ -579,7 +579,7 @@ import fsSync from 'node:fs'
 
 （参数类型如 preload 现有条目使用具体类型而非 any，则改为 `import type { TextEditItem } from '../shared/types'` 并使用 `TextEditItem[]`。）
 
-- [ ] **Step 5: 类型检查**
+- [x] **Step 5: 类型检查**
 
 ```bash
 npx tsc -p tsconfig.node.json --noEmit && npx tsc --noEmit
@@ -587,7 +587,7 @@ npx tsc -p tsconfig.node.json --noEmit && npx tsc --noEmit
 
 预期：零错误。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 git add src/shared/types.ts src/main/services/pythonService.ts src/main/index.ts src/preload/index.ts
@@ -602,7 +602,14 @@ git commit -m "feat(main): editTextBatch service with auto-chunking, IPC channel
 - Create: `tests/editTextBatch.test.ts`
 - Modify: `package.json`（test 脚本）
 
-- [ ] **Step 1: 写测试文件**
+- [x] **Step 1: 写测试文件**
+
+覆盖用例（在下方基础代码上，实施者需在 Test 3 之后追加以下用例，风格与现有断言一致）：
+- **畸形属性项**：edits 含 `color: [0.5]` 短数组项与 `"abc"` 字符串项 → 断言整批 `success:true`、畸形项 `ok:false` 且 error 含「属性字段无效」/「编辑项格式无效」、正常项不受影响
+- **溢出缩字号 warning**：小 rect + 长文本 → 断言该项 `ok:true` 且 `warning` 含「缩小字号」
+- **同页双块**：同一页两个相邻块各放彩色背景（一红一蓝）并同时编辑 → 断言两块背景采样互不污染（各自区域内像素仍为原色系）
+- **加密文档**：pymupdf 设 owner password 的副本 → 断言返回 `success:false` 且 error 含「加密」
+- **分批链路**：将 pythonService 的 `BATCH_LIMIT` 常量导出（或测试中构造 201 项 edits）触发分批 → 断言全部 results 索引为全局连续、输出文件为最终 outputPath、中间临时文件已清理
 
 ```typescript
 import fs from 'node:fs/promises'
@@ -717,7 +724,7 @@ runEditTextBatchTests().catch((err) => {
 
 注意：`pythonService.getTextBlocks` 的方法名以 pythonService.ts 实际为准（IPC `python:getTextBlocks` 调用的那个方法，约 300-325 行），如叫别的名字则同步替换。
 
-- [ ] **Step 2: 注册进 package.json**
+- [x] **Step 2: 注册进 package.json**
 
 `scripts.test` 改为：
 
@@ -726,7 +733,7 @@ runEditTextBatchTests().catch((err) => {
 "test:editbatch": "tsx tests/editTextBatch.test.ts"
 ```
 
-- [ ] **Step 3: 运行**
+- [x] **Step 3: 运行**
 
 ```bash
 npm run test:editbatch
@@ -734,7 +741,7 @@ npm run test:editbatch
 
 预期：4 个 Test 全过，输出 🎉。
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交**
 
 ```bash
 git add tests/editTextBatch.test.ts package.json
@@ -748,7 +755,7 @@ git commit -m "test: end-to-end regression for edit_text_batch fidelity"
 **Files:**
 - Modify: `src/renderer/src/stores/useDocumentStore.ts`
 
-- [ ] **Step 1: 导入类型**
+- [x] **Step 1: 导入类型**
 
 文件顶部加：
 
@@ -756,7 +763,7 @@ git commit -m "test: end-to-end regression for edit_text_batch fidelity"
 import type { TextEditItem } from '../../../shared/types'
 ```
 
-- [ ] **Step 2: 扩展 DocumentState 接口**
+- [x] **Step 2: 扩展 DocumentState 接口**
 
 在 `isLoadingBlocks: boolean` 之后加状态：
 
@@ -776,7 +783,7 @@ import type { TextEditItem } from '../../../shared/types'
   applyPendingEdits: () => Promise<{ applied: number; failed: number; error?: string }>
 ```
 
-- [ ] **Step 3: 初始状态**
+- [x] **Step 3: 初始状态**
 
 在 `isLoadingBlocks: false,` 之后加：
 
@@ -786,7 +793,7 @@ import type { TextEditItem } from '../../../shared/types'
   editFailures: {},
 ```
 
-- [ ] **Step 4: 实现 action**
+- [x] **Step 4: 实现 action**
 
 在 `saveTextEdit` 实现之后插入（`saveTextEdit` 保留不删，AI 链路仍可能引用）：
 
@@ -876,11 +883,11 @@ import type { TextEditItem } from '../../../shared/types'
   },
 ```
 
-- [ ] **Step 5: 文档切换/关闭时清空队列**
+- [x] **Step 5: 文档切换/关闭时清空队列**
 
 在 `closeTab`、`setActiveTab` 的 `set(...)` 中各追加 `pendingEdits: [], editFailures: {}`（两个 action 的实现体里找到对应 set 调用，加入这两个键）。`openDocument` 成功打开新文档的 set 中同样追加。
 
-- [ ] **Step 6: 类型检查 + 提交**
+- [x] **Step 6: 类型检查 + 提交**
 
 ```bash
 npx tsc --noEmit
@@ -897,7 +904,7 @@ git commit -m "feat(store): pendingEdits queue with batch apply, failure trackin
 **Files:**
 - Modify: `src/renderer/src/components/viewer/PDFViewer.tsx`
 
-- [ ] **Step 1: store 解构与本地状态调整**
+- [x] **Step 1: store 解构与本地状态调整**
 
 组件顶部现有的 `useDocumentStore()` 解构（含 `isLoadingBlocks` 处，约 50-60 行）追加：
 
@@ -929,7 +936,7 @@ git commit -m "feat(store): pendingEdits queue with batch apply, failure trackin
 
 （`useRef` 如未导入则加入 react 导入。）
 
-- [ ] **Step 2: 入队辅助函数**
+- [x] **Step 2: 入队辅助函数**
 
 在 `handleCommitTextEdit`（约 548 行）位置，用以下代码整体替换该函数：
 
@@ -998,7 +1005,7 @@ git commit -m "feat(store): pendingEdits queue with batch apply, failure trackin
 import { askForm } from '../../stores/usePromptStore'
 ```
 
-- [ ] **Step 3: 翻页/切模式自动入队**
+- [x] **Step 3: 翻页/切模式自动入队**
 
 现有 effect（约 270-275 行）：
 
@@ -1038,7 +1045,7 @@ import { askForm } from '../../stores/usePromptStore'
   }, [viewerMode, activeTab?.currentPage, pdfDoc])
 ```
 
-- [ ] **Step 4: Esc 退出与应用期间键盘锁定**
+- [x] **Step 4: Esc 退出与应用期间键盘锁定**
 
 在主键盘 effect（约 463 行 `const onKeyDown = (e: KeyboardEvent) => {`）函数体最前面加：
 
@@ -1052,7 +1059,7 @@ import { askForm } from '../../stores/usePromptStore'
 
 并把该 effect 的依赖数组补充 `exitEditTextMode` 相关引用已含在内则不动（effect 通过 getState 读取，无需加依赖）。
 
-- [ ] **Step 5: 编辑提示条改造（应用/放弃/完成按钮）**
+- [x] **Step 5: 编辑提示条改造（应用/放弃/完成按钮）**
 
 将「正文编辑模式引导提示」块（约 1150-1168 行，`{viewerMode === 'edit_text' && (` 起的整个 div）替换为：
 
@@ -1115,7 +1122,7 @@ import { askForm } from '../../stores/usePromptStore'
       )}
 ```
 
-- [ ] **Step 6: 覆盖层块渲染改造**
+- [x] **Step 6: 覆盖层块渲染改造**
 
 在 map 回调内部（约 1258 行），把：
 
@@ -1198,7 +1205,7 @@ textarea 底部的「保存」按钮文案与行为改为入队：
                               setEditingBlockId(null)
 ```
 
-- [ ] **Step 7: 应用进度遮罩**
+- [x] **Step 7: 应用进度遮罩**
 
 在组件最外层 `return (` 的根 div（`className="flex-1 flex overflow-hidden relative bg-slate-950"`）内部末尾（正文覆盖层之后、根 div 闭合前）加：
 
@@ -1216,7 +1223,7 @@ textarea 底部的「保存」按钮文案与行为改为入队：
       )}
 ```
 
-- [ ] **Step 8: 清理 editedBlocks 残留引用**
+- [x] **Step 8: 清理 editedBlocks 残留引用**
 
 ```bash
 grep -n "editedBlocks" src/renderer/src/components/viewer/PDFViewer.tsx
@@ -1224,7 +1231,7 @@ grep -n "editedBlocks" src/renderer/src/components/viewer/PDFViewer.tsx
 
 预期：无输出（state、setEditedBlocks 及所有引用均已在前面步骤替换）。若仍有残留，逐一按上下文替换为 pendingEdits 派生逻辑。
 
-- [ ] **Step 9: 类型检查 + 提交**
+- [x] **Step 9: 类型检查 + 提交**
 
 ```bash
 npx tsc --noEmit
@@ -1240,7 +1247,7 @@ git commit -m "feat(viewer): queued in-place text editing with batch apply, prog
 
 **Files:** 无新改动（验证性任务）
 
-- [ ] **Step 1: 类型检查**
+- [x] **Step 1: 类型检查**
 
 ```bash
 npm run typecheck
@@ -1248,7 +1255,7 @@ npm run typecheck
 
 预期：零错误。
 
-- [ ] **Step 2: 全量测试**
+- [x] **Step 2: 全量测试**
 
 ```bash
 npm test
@@ -1256,7 +1263,7 @@ npm test
 
 预期：4 套测试全过（7 + 3 + 37 + 4 项），含新增 editTextBatch 套件。
 
-- [ ] **Step 3: 手动验证清单（开发模式）**
+- [x] **Step 3: 手动验证清单（开发模式）**
 
 ```bash
 npm run dev
@@ -1273,7 +1280,7 @@ npm run dev
 7. Esc 或「完成」退出：有队列时弹「应用并退出 / 放弃修改 / 取消」选择框
 8. 「放弃全部」清空队列与绿框
 
-- [ ] **Step 4: 最终提交**
+- [x] **Step 4: 最终提交**
 
 ```bash
 git add -A
