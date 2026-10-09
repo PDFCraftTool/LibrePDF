@@ -9,9 +9,39 @@ import type { TextEditItem } from '../src/shared/types'
 
 const execFileAsync = promisify(execFile)
 
+/** 与 PythonService.findPythonExecutable 同序解析解释器（venv 优先，回退 py/python3/python） */
+async function resolvePython(): Promise<string> {
+  const pythonRoot = path.join(process.cwd(), 'python')
+  const localCandidates = process.platform === 'win32'
+    ? [
+        path.join(pythonRoot, 'venv', 'Scripts', 'python.exe'),
+        path.join(pythonRoot, 'runtime', 'python.exe'),
+        path.join(process.cwd(), 'python', 'venv', 'Scripts', 'python.exe')
+      ]
+    : [
+        path.join(pythonRoot, 'venv', 'bin', 'python'),
+        path.join(process.cwd(), 'python', 'venv', 'bin', 'python')
+      ]
+  for (const candidate of localCandidates) {
+    if (fsSync.existsSync(candidate)) return candidate
+  }
+  const systemCandidates = process.platform === 'win32' ? ['python', 'py', 'python3'] : ['python3', 'python']
+  for (const candidate of systemCandidates) {
+    try {
+      await execFileAsync(candidate, ['--version'], { timeout: 8000 })
+      return candidate
+    } catch { /* try next */ }
+  }
+  throw new Error('未找到可用的 Python 解释器')
+}
+
+/** 全测试运行只解析一次解释器 */
+const pythonBinPromise: Promise<string> = resolvePython()
+
 /** 直接跑一段 Python 代码（用于构造 fixture 与像素级断言），返回 stdout */
 async function runPython(code: string): Promise<string> {
-  const { stdout } = await execFileAsync('python', ['-c', code], { encoding: 'utf-8', maxBuffer: 20 * 1024 * 1024 })
+  const pythonBin = await pythonBinPromise
+  const { stdout } = await execFileAsync(pythonBin, ['-c', code], { encoding: 'utf-8', maxBuffer: 20 * 1024 * 1024 })
   return stdout.trim()
 }
 
@@ -33,8 +63,9 @@ function parseLastJson(stdout: string): any {
 
 /** 直接调用 bridge.py（用于绕过 TS 映射层、投递畸形编辑项） */
 async function runBridge(args: string[]): Promise<any> {
+  const pythonBin = await pythonBinPromise
   const bridgePath = path.join(process.cwd(), 'python', 'bridge.py')
-  const { stdout } = await execFileAsync('python', [bridgePath, ...args], {
+  const { stdout } = await execFileAsync(pythonBin, [bridgePath, ...args], {
     encoding: 'utf-8',
     maxBuffer: 20 * 1024 * 1024
   })
