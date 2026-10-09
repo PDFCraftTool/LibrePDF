@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "com.pdfopen.studio",
+  "productName": "PDFOpen Studio",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist",
+    "dist-electron"
+  ],
+  "extraResources": [
+    {
+      "from": "resources",
+      "to": "",
+      "filter": ["**/*"]
+    },
+    {
+      // pdf.js 字符映射与标准字体，供离线渲染中日韩等文档使用（主进程 pdfjs:asset 读取）
+      "from": "node_modules/pdfjs-dist/cmaps",
+      "to": "pdfjs/cmaps"
+    },
+    {
+      "from": "node_modules/pdfjs-dist/standard_fonts",
+      "to": "pdfjs/standard_fonts"
+    },
+    {
+      "from": "python",
+      "to": "python",
+      "filter": ["**/*", "!**/__pycache__/**", "!**/venv/**"]
+    }
+  ],
+  "win": {
+    "signAndEditExecutable": false,
+    "forceCodeSigning": false,
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      },
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
+    ]
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "deleteAppDataOnUninstall": false
+  }
+}

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-electron/
+release/
+__pycache__/
+*.pyc
+*.log
+*.tsbuildinfo
+.DS_Store
+tests/fixtures/*
+!tests/fixtures/.gitkeep
