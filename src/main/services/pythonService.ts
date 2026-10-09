@@ -14,7 +14,9 @@ import type {
   CompressResult,
   RepairResult,
   SanitizeResult,
-  SignatureValidationResult
+  SignatureValidationResult,
+  TextEditItem,
+  TextEditResult
 } from '../../shared/types'
 
 // 使用默认导入：在纯 Node（tsx 测试）下 'electron' 只导出可执行文件路径字符串，app 为 undefined
@@ -83,6 +85,11 @@ export interface PythonTableResult {
 
 export class PythonService {
   private cachedPython: string | null = null
+
+  /** 批量编辑分批守卫（Windows argv 约 32K 上限）：单批条目数上限 */
+  static readonly EDIT_BATCH_LIMIT = 200
+  /** 批量编辑分批守卫（Windows argv 约 32K 上限）：单批序列化字节的保守预算 */
+  static readonly EDIT_BATCH_BYTES = 20000
 
   private getPythonRoot(): string {
     // 打包后 bridge.py 位于 resources/python（见 electron-builder extraResources）
@@ -361,43 +368,65 @@ export class PythonService {
     }
   }
 
-  /** 批量编辑分批上限（Windows argv 约 32K；导出为静态常量便于测试注入） */
-  static readonly EDIT_BATCH_LIMIT = 200
-
   /**
    * 批量正文编辑：一次子进程调用处理多个文本块。
-   * edits 超过 EDIT_BATCH_LIMIT 时内部自动分批串联：
+   * 内部按条目数与序列化字节双上限贪心分批（Windows argv 守卫），分批时自动串联：
    * 第 i 批的 output 即第 i+1 批的 input；results[].index 统一换算为全局索引。
-   * 中途批次失败：停止后续批次，返回已成功批次的 results 与 success:false。
+   * 中途批次失败：停止后续批次，返回已成功批次与失败批次的部分 results 及 success:false。
    */
   async editTextBatch(
     inputPath: string,
     outputPath: string,
-    edits: Array<{ page: number; rect: number[]; newText: string; fontName?: string | null; fontSize?: number | null; color?: number[] | null }>
-  ): Promise<{ success: boolean; outputPath?: string; results?: Array<{ index: number; ok: boolean; warning?: string | null; error?: string }>; error?: string }> {
+    edits: TextEditItem[]
+  ): Promise<{ success: boolean; outputPath?: string; results?: TextEditResult[]; error?: string }> {
     if (!edits || edits.length === 0) {
       return { success: false, error: '编辑列表为空' }
     }
-    const limit = PythonService.EDIT_BATCH_LIMIT
-    if (edits.length <= limit) {
-      return this.runEditTextBatch(inputPath, outputPath, edits, 0)
+    // 剥离 bridge.py 忽略的字段（blockId/oldText），按实际序列化载荷计量大小
+    const wireItems = edits.map((e) => ({
+      page: e.page,
+      rect: e.rect,
+      newText: e.newText,
+      fontName: e.fontName,
+      fontSize: e.fontSize,
+      color: e.color
+    }))
+    // 贪心分批：条目数或字节数任一超限即切分新批；仅一批时直接写入 outputPath，不产生临时文件
+    const chunks: Array<typeof wireItems> = []
+    let current: typeof wireItems = []
+    let currentBytes = 2 // 空数组 "[]" 的字节数
+    for (const item of wireItems) {
+      const itemBytes = JSON.stringify(item).length + 1 // +1 为数组内逗号分隔符
+      const overCount = current.length >= PythonService.EDIT_BATCH_LIMIT
+      const overBytes = current.length > 0 && currentBytes + itemBytes > PythonService.EDIT_BATCH_BYTES
+      if (overCount || overBytes) {
+        chunks.push(current)
+        current = []
+        currentBytes = 2
+      }
+      current.push(item)
+      currentBytes += itemBytes
     }
-    const allResults: Array<{ index: number; ok: boolean; warning?: string | null; error?: string }> = []
+    if (current.length > 0) chunks.push(current)
+
+    const allResults: TextEditResult[] = []
     const tempFiles: string[] = []
     let currentInput = inputPath
+    let indexOffset = 0
     try {
-      for (let start = 0; start < edits.length; start += limit) {
-        const chunk = edits.slice(start, start + limit)
-        const isLast = start + limit >= edits.length
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i]
+        const isLast = i === chunks.length - 1
         const chunkOutput = isLast
           ? outputPath
-          : path.join(os.tmpdir(), `pdfopen_batch_${Date.now()}_${start}.pdf`)
+          : path.join(os.tmpdir(), `pdfopen_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.pdf`)
         if (!isLast) tempFiles.push(chunkOutput)
-        const res = await this.runEditTextBatch(currentInput, chunkOutput, chunk, start)
+        const res = await this.runEditTextBatch(currentInput, chunkOutput, chunk, indexOffset)
         if (!res.success) {
-          return { success: false, error: res.error, results: allResults }
+          return { success: false, error: res.error, results: [...allResults, ...(res.results || [])] }
         }
         allResults.push(...(res.results || []))
+        indexOffset += chunk.length
         currentInput = chunkOutput
       }
       return { success: true, outputPath, results: allResults }
@@ -411,9 +440,9 @@ export class PythonService {
   private async runEditTextBatch(
     inputPath: string,
     outputPath: string,
-    edits: Array<{ page: number; rect: number[]; newText: string; fontName?: string | null; fontSize?: number | null; color?: number[] | null }>,
+    edits: Array<{ page: number; rect: number[]; newText: string; fontName: string | null; fontSize: number | null; color: number[] | null }>,
     indexOffset: number
-  ): Promise<{ success: boolean; outputPath?: string; results?: Array<{ index: number; ok: boolean; warning?: string | null; error?: string }>; error?: string }> {
+  ): Promise<{ success: boolean; outputPath?: string; results?: TextEditResult[]; error?: string }> {
     try {
       const pythonBin = await this.findPythonExecutable()
       const scriptPath = this.getBridgeScriptPath()
@@ -426,8 +455,9 @@ export class PythonService {
       ]
       const { stdout } = await execFileAsync(pythonBin, args, { encoding: 'utf-8' })
       const parsed = this.extractJsonFromStdout(stdout)
-      if (parsed.success && Array.isArray(parsed.results)) {
-        parsed.results = parsed.results.map((r: any) => ({ ...r, index: r.index + indexOffset }))
+      // 无论成功与否都换算全局索引，保证失败批次的部分 results 并入后索引仍正确
+      if (Array.isArray(parsed.results)) {
+        parsed.results = parsed.results.map((r: TextEditResult) => ({ ...r, index: r.index + indexOffset }))
       }
       return parsed
     } catch (err: any) {
