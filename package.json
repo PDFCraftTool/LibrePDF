@@ -10,10 +10,11 @@
     "build": "npm run typecheck && vite build && electron-builder",
     "build:unpack": "npm run typecheck && vite build && electron-builder --dir",
     "preview": "vite preview",
-    "test": "tsx tests/pdfEngine.test.ts && tsx tests/pythonSidecar.test.ts && tsx tests/bentoStirlingEngine.test.ts",
+    "test": "tsx tests/pdfEngine.test.ts && tsx tests/pythonSidecar.test.ts && tsx tests/bentoStirlingEngine.test.ts && tsx tests/editTextBatch.test.ts",
     "test:engine": "tsx tests/pdfEngine.test.ts",
     "test:sidecar": "tsx tests/pythonSidecar.test.ts",
-    "test:bento": "tsx tests/bentoStirlingEngine.test.ts"
+    "test:bento": "tsx tests/bentoStirlingEngine.test.ts",
+    "test:editbatch": "tsx tests/editTextBatch.test.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",
