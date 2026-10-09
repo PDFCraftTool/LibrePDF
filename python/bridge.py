@@ -273,6 +273,7 @@ def get_page_text_blocks(input_path: str, page_num: int) -> Dict[str, Any]:
 
     page = doc[page_num - 1]
     blocks_data = []
+    used_ids: set = set()  # 页内 ID 去重：同坐标键碰撞时追加序号后缀
 
     # 使用 dict 结构获取 span 级真实字体属性（替代 blocks 模式的启发式估算）
     data = page.get_text("dict")
@@ -302,12 +303,20 @@ def get_page_text_blocks(input_path: str, page_num: int) -> Dict[str, Any]:
                 font_stats[fname] = {"chars": 0, "size": sp.get("size", 12), "color": sp.get("color", 0)}
             font_stats[fname]["chars"] += len(sp.get("text", ""))
         main_name, main_info = max(font_stats.items(), key=lambda kv: kv[1]["chars"])
-        ci = int(main_info["color"])
-        color = [round(((ci >> 16) & 255) / 255, 3), round(((ci >> 8) & 255) / 255, 3), round((ci & 255) / 255, 3)]
+        color_int = int(main_info["color"])
+        color = [round(((color_int >> 16) & 255) / 255, 3), round(((color_int >> 8) & 255) / 255, 3), round((color_int & 255) / 255, 3)]
+
+        # 稳定坐标键：重提取后不变，前端绿框覆盖不再错位；碰撞时追加 -2/-3 序号
+        block_id = f"{page_num}-{round(x0)}-{round(y0)}-{round(x1)}-{round(y1)}"
+        if block_id in used_ids:
+            seq = 2
+            while f"{block_id}-{seq}" in used_ids:
+                seq += 1
+            block_id = f"{block_id}-{seq}"
+        used_ids.add(block_id)
 
         blocks_data.append({
-            # 稳定坐标键：重提取后不变，前端绿框覆盖不再错位
-            "id": f"{page_num}-{round(x0)}-{round(y0)}-{round(x1)}-{round(y1)}",
+            "id": block_id,
             "rect": [round(x0, 2), round(y0, 2), round(x1, 2), round(y1, 2)],
             "text": text,
             "fontName": main_name,
