@@ -89,7 +89,6 @@ export const PDFViewer: React.FC = () => {
     fontSize: number | null
     color: number[] | null
   } | null>(null)
-  const [failedHoverKey, setFailedHoverKey] = useState<string | null>(null)
 
   // 手绘与批注持久化图层
   const [isDrawing, setIsDrawing] = useState(false)
@@ -286,11 +285,11 @@ export const PDFViewer: React.FC = () => {
   useEffect(() => {
     if (viewerMode === 'edit_text' && activeTab && pdfDoc) {
       // 翻页/重载前：未入队的草稿自动入队，不再静默丢弃
-      if (editingMetaRef.current && editingText.trim()) {
+      if (editingBlockId && editingMetaRef.current && editingText.trim()) {
         const meta = editingMetaRef.current
         enqueueTextEdit({
           page: meta.page,
-          blockId: editingBlockId || '',
+          blockId: editingBlockId,
           rect: meta.rect,
           oldText: meta.oldText,
           newText: editingText,
@@ -493,13 +492,13 @@ export const PDFViewer: React.FC = () => {
     if (!activeTab) return
     const onKeyDown = (e: KeyboardEvent) => {
       if (useDocumentStore.getState().isApplyingEdits) return
+      if (useDocumentStore.getState().activeDialog !== 'none') return
       if (e.key === 'Escape' && useDocumentStore.getState().viewerMode === 'edit_text') {
         void exitEditTextModeRef.current()
         return
       }
       const target = e.target as HTMLElement | null
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return
-      if (useDocumentStore.getState().activeDialog !== 'none') return
       const store = useDocumentStore.getState()
       const tab = store.tabs.find((t) => t.id === store.activeTabId)
       if (!tab) return
@@ -639,7 +638,9 @@ export const PDFViewer: React.FC = () => {
 
   // 全局 keydown 监听依赖数组仅含 activeTab?.id，用 ref 转发最新闭包，避免 Esc 时读到过期的草稿状态
   const exitEditTextModeRef = useRef(exitEditTextMode)
-  exitEditTextModeRef.current = exitEditTextMode
+  useEffect(() => {
+    exitEditTextModeRef.current = exitEditTextMode
+  })
 
   const handleSelectFile = async () => {
     const paths = await window.electronAPI.openFileDialog()
@@ -1270,14 +1271,16 @@ export const PDFViewer: React.FC = () => {
           {pendingEdits.length > 0 && (
             <button
               onClick={() => clearPendingEdits()}
-              className="px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px]"
+              disabled={isApplyingEdits}
+              className="px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 text-[11px]"
             >
               {tr('放弃全部', 'Discard all')}
             </button>
           )}
           <button
             onClick={exitEditTextMode}
-            className="px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px]"
+            disabled={isApplyingEdits}
+            className="px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 text-[11px]"
           >
             {tr('完成', 'Done')}
           </button>
@@ -1399,8 +1402,6 @@ export const PDFViewer: React.FC = () => {
                       }
                     }}
                     title={failureMsg || undefined}
-                    onMouseEnter={() => failureMsg && setFailedHoverKey(`${curPage}:${blk.id}`)}
-                    onMouseLeave={() => setFailedHoverKey(null)}
                     style={{
                       left: `${left}px`,
                       top: `${top}px`,
