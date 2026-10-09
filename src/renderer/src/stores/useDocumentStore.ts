@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { PDFMetadata } from '../../../shared/types'
+import type { PDFMetadata, TextEditItem } from '../../../shared/types'
 import { toast } from './useToastStore'
 import { tr } from '../i18n'
 
@@ -83,6 +83,10 @@ interface DocumentState {
   viewerMode: ViewerMode
   pageTextBlocks: any[]
   isLoadingBlocks: boolean
+  pendingEdits: TextEditItem[]
+  isApplyingEdits: boolean
+  /** 应用失败的编辑项：key = `${page}:${blockId}`，value = 失败原因 */
+  editFailures: Record<string, string>
   
   // Actions
   openDocument: (filePath: string) => Promise<boolean>
@@ -97,6 +101,10 @@ interface DocumentState {
   setViewerMode: (mode: ViewerMode) => void
   fetchPageTextBlocks: () => Promise<void>
   saveTextEdit: (blockId: string, newText: string) => Promise<boolean>
+  enqueueTextEdit: (item: TextEditItem) => void
+  discardEdit: (page: number, blockId: string) => void
+  clearPendingEdits: () => void
+  applyPendingEdits: () => Promise<{ applied: number; failed: number; error?: string }>
   saveAnnotation: (annotType: string, options: any) => Promise<boolean>
   reloadCurrentDocument: () => Promise<void>
   applyModifiedPDF: (newFilePath: string, options?: { silent?: boolean }) => Promise<boolean>
@@ -115,12 +123,15 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   viewerMode: 'view',
   pageTextBlocks: [],
   isLoadingBlocks: false,
+  pendingEdits: [],
+  isApplyingEdits: false,
+  editFailures: {},
 
   openDocument: async (filePath: string) => {
     try {
       const existing = get().tabs.find((t) => t.filePath === filePath || t.originalFilePath === filePath)
       if (existing) {
-        set({ activeTabId: existing.id })
+        set({ activeTabId: existing.id, pendingEdits: [], editFailures: {} })
         // 工具多次输出到同一路径时，已打开的标签仍是旧内容；若无未保存修改则从磁盘刷新
         if (!existing.isModified) {
           try {
@@ -166,7 +177,9 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
 
       set((state) => ({
         tabs: [...state.tabs, newTab],
-        activeTabId: newTab.id
+        activeTabId: newTab.id,
+        pendingEdits: [],
+        editFailures: {}
       }))
       return true
     } catch (err: any) {
@@ -200,14 +213,23 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
       if (state.activeTabId === tabId) {
         nextActiveId = newTabs.length > 0 ? newTabs[newTabs.length - 1].id : null
       }
+      const closedActive = state.activeTabId === tabId
       return {
         tabs: newTabs,
-        activeTabId: nextActiveId
+        activeTabId: nextActiveId,
+        // 仅在关闭的是当前文档时清空待应用队列
+        ...(closedActive ? { pendingEdits: [], editFailures: {} } : {})
       }
     })
   },
 
-  setActiveTab: (tabId: string) => set({ activeTabId: tabId }),
+  setActiveTab: (tabId: string) =>
+    set((s) =>
+      // 仅在真正切换文档时清空待应用队列；重复点击当前标签不应丢弃排队中的修改
+      s.activeTabId === tabId
+        ? { activeTabId: tabId }
+        : { activeTabId: tabId, pendingEdits: [], editFailures: {} }
+    ),
 
   setCurrentPage: (page: number) => {
     set((state) => ({
@@ -309,6 +331,99 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
     } catch (err) {
       console.error('Save text edit error:', err)
       return false
+    }
+  },
+
+  enqueueTextEdit: (item) =>
+    set((s) => ({
+      // 同页同块后改优先覆盖；入队即清除该项旧的失败标记
+      pendingEdits: [
+        ...s.pendingEdits.filter((e) => !(e.page === item.page && e.blockId === item.blockId)),
+        item
+      ],
+      editFailures: Object.fromEntries(
+        Object.entries(s.editFailures).filter(([k]) => k !== `${item.page}:${item.blockId}`)
+      )
+    })),
+
+  discardEdit: (page, blockId) =>
+    set((s) => ({
+      pendingEdits: s.pendingEdits.filter((e) => !(e.page === page && e.blockId === blockId))
+    })),
+
+  clearPendingEdits: () => set({ pendingEdits: [], editFailures: {} }),
+
+  applyPendingEdits: async () => {
+    const { activeTabId, tabs, pendingEdits, isApplyingEdits } = get()
+    const activeTab = tabs.find((t) => t.id === activeTabId)
+    if (!activeTab || pendingEdits.length === 0 || isApplyingEdits) {
+      return { applied: 0, failed: 0 }
+    }
+    set({ isApplyingEdits: true, editFailures: {} })
+    try {
+      const outputPath = await window.electronAPI.getTempPdfPath('pdfopen_text_batch')
+      const res = await window.electronAPI.pythonEditTextBatch(
+        activeTab.filePath,
+        outputPath,
+        pendingEdits
+      )
+      if (!res.success || !res.outputPath) {
+        toast.error(tr('文字修改失败', 'Failed to edit text'), res.error)
+        return { applied: 0, failed: pendingEdits.length, error: res.error }
+      }
+      const okIndexes = new Set((res.results || []).filter((r) => r.ok).map((r) => r.index))
+      const applied = okIndexes.size
+      const failedItems = pendingEdits.filter((_, idx) => !okIndexes.has(idx))
+      const failures: Record<string, string> = {}
+      for (const r of res.results || []) {
+        if (!r.ok) {
+          const item = pendingEdits[r.index]
+          if (item) {
+            failures[`${item.page}:${item.blockId}`] = r.error || tr('未知错误', 'Unknown error')
+          }
+        }
+      }
+      // 一次批量 = 一条 undo 历史
+      const reloadOk = await get().applyModifiedPDF(res.outputPath, { silent: true })
+      if (!reloadOk) return { applied: 0, failed: pendingEdits.length }
+      await get().fetchPageTextBlocks()
+
+      // 失败项 rect 可能因同页先前编辑的文本回流而过时：按 oldText 在新块中重新对位；
+      // 对不上的项从队列移除并提示重新选择，避免用旧坐标重放擦错位置
+      const cur = get()
+      const curTab = cur.tabs.find((t) => t.id === cur.activeTabId)
+      const kept: TextEditItem[] = []
+      for (const item of failedItems) {
+        if (curTab && item.page === curTab.currentPage) {
+          const match = cur.pageTextBlocks.find((b) => b.text === item.oldText)
+          if (match) {
+            kept.push({ ...item, blockId: match.id, rect: match.rect })
+            continue
+          }
+          failures[`${item.page}:${item.blockId}`] = tr(
+            '位置已失效，请重新选择文本块',
+            'Position stale, please re-select the text block'
+          )
+          continue
+        }
+        kept.push(item)
+      }
+      set({ pendingEdits: kept, editFailures: failures })
+
+      const summary =
+        tr(`成功应用 ${applied} 处修改`, `${applied} edit(s) applied`) +
+        (kept.length > 0 ? tr(`，${kept.length} 处失败`, `, ${kept.length} failed`) : '')
+      if (kept.length > 0) {
+        toast.error(tr('部分文字修改失败', 'Some edits failed'), summary)
+      } else {
+        toast.success(tr('文字修改已应用', 'Text edits applied'), summary)
+      }
+      return { applied, failed: kept.length }
+    } catch (err) {
+      console.error('applyPendingEdits error:', err)
+      return { applied: 0, failed: pendingEdits.length, error: String(err) }
+    } finally {
+      set({ isApplyingEdits: false })
     }
   },
 
