@@ -53,6 +53,8 @@ const electronAPI: IElectronAPI = {
   pythonGetTextBlocks: (inputPath, pageNum) => ipcRenderer.invoke('python:getTextBlocks', inputPath, pageNum),
   pythonEditText: (inputPath, outputPath, pageNum, rect, newText, fontSize) =>
     ipcRenderer.invoke('python:editText', inputPath, outputPath, pageNum, rect, newText, fontSize),
+  pythonEditTextBatch: (inputPath, outputPath, edits) =>
+    ipcRenderer.invoke('python:editTextBatch', inputPath, outputPath, edits),
   pythonRedact: (inputPath, outputPath, pageNum, rects, pattern, fillColor) =>
     ipcRenderer.invoke('python:redact', inputPath, outputPath, pageNum, rects, pattern, fillColor),
   pythonAddAnnotation: (inputPath, outputPath, pageNum, annotType, options) =>

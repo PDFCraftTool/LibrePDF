@@ -188,6 +188,37 @@ export interface ChatMessage {
   citations?: { page: number; text: string; score: number }[]
 }
 
+/** 单个文本块的提取信息（span 级真实属性；PDF.js 回退块属性可为 null） */
+export interface TextBlockInfo {
+  id: string
+  rect: number[]
+  text: string
+  fontName?: string | null
+  fontSize?: number | null
+  color?: number[] | null
+  isClient?: boolean
+}
+
+/** 待应用的批量正文编辑项 */
+export interface TextEditItem {
+  page: number
+  blockId: string
+  rect: number[]
+  oldText: string
+  newText: string
+  fontName: string | null
+  fontSize: number | null
+  color: number[] | null
+}
+
+/** 批量编辑逐块结果（index 为全局索引） */
+export interface TextEditResult {
+  index: number
+  ok: boolean
+  warning?: string | null
+  error?: string
+}
+
 // Electron IPC API definition
 export interface IElectronAPI {
   // File dialogs
@@ -229,8 +260,9 @@ export interface IElectronAPI {
   pythonCheckEnv: () => Promise<{ ready: boolean; engine?: string; version?: string; error?: string }>
   pythonOcrSandwich: (inputPath: string, outputPath: string, dpi?: number) => Promise<{ success: boolean; outputPath?: string; pageCount?: number; totalWords?: number; error?: string }>
   pythonExtractTables: (inputPath: string, outputPath: string, pages?: number[]) => Promise<{ success: boolean; outputPath?: string; tableCount?: number; markdown?: string; error?: string }>
-  pythonGetTextBlocks: (inputPath: string, pageNum: number) => Promise<{ success: boolean; blocks?: any[]; pageWidth?: number; pageHeight?: number; error?: string }>
+  pythonGetTextBlocks: (inputPath: string, pageNum: number) => Promise<{ success: boolean; blocks?: TextBlockInfo[]; pageWidth?: number; pageHeight?: number; error?: string }>
   pythonEditText: (inputPath: string, outputPath: string, pageNum: number, rect: number[], newText: string, fontSize?: number) => Promise<{ success: boolean; outputPath?: string; error?: string }>
+  pythonEditTextBatch: (inputPath: string, outputPath: string, edits: TextEditItem[]) => Promise<{ success: boolean; outputPath?: string; results?: TextEditResult[]; error?: string }>
   pythonRedact: (inputPath: string, outputPath: string, pageNum?: number, rects?: number[][], pattern?: string, fillColor?: number[]) => Promise<{ success: boolean; outputPath?: string; redactedCount?: number; error?: string }>
   pythonAddAnnotation: (inputPath: string, outputPath: string, pageNum: number, annotType: string, options: { rect?: number[]; points?: number[][]; color?: number[]; content?: string }) => Promise<{ success: boolean; outputPath?: string; error?: string }>
   pythonQueryRAG: (inputPath: string, query: string) => Promise<{ success: boolean; citations?: { page: number; text: string; score: number }[]; error?: string }>

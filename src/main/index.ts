@@ -545,6 +545,10 @@ function setupIpcHandlers() {
     return await pythonService.editText(inputPath, outputPath, pageNum, rect, newText, fontSize)
   })
 
+  ipcMain.handle('python:editTextBatch', async (_, inputPath: string, outputPath: string, edits: any[]) => {
+    return await pythonService.editTextBatch(inputPath, outputPath, edits)
+  })
+
   ipcMain.handle('python:redact', async (_, inputPath: string, outputPath: string, pageNum?: number, rects?: number[][], pattern?: string, fillColor?: number[]) => {
     return await pythonService.redact(inputPath, outputPath, pageNum, rects, pattern, fillColor)
   })

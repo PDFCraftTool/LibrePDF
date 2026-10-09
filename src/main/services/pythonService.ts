@@ -1,6 +1,8 @@
 import { execFile, spawn, type ChildProcess } from 'node:child_process'
 import path from 'node:path'
 import fs from 'node:fs/promises'
+import fsSync from 'node:fs'
+import os from 'node:os'
 import { promisify } from 'node:util'
 import electron from 'electron'
 import type {
@@ -356,6 +358,80 @@ export class PythonService {
       return this.extractJsonFromStdout(stdout)
     } catch (err: any) {
       return { success: false, error: err.message || '正文编辑失败' }
+    }
+  }
+
+  /** 批量编辑分批上限（Windows argv 约 32K；导出为静态常量便于测试注入） */
+  static readonly EDIT_BATCH_LIMIT = 200
+
+  /**
+   * 批量正文编辑：一次子进程调用处理多个文本块。
+   * edits 超过 EDIT_BATCH_LIMIT 时内部自动分批串联：
+   * 第 i 批的 output 即第 i+1 批的 input；results[].index 统一换算为全局索引。
+   * 中途批次失败：停止后续批次，返回已成功批次的 results 与 success:false。
+   */
+  async editTextBatch(
+    inputPath: string,
+    outputPath: string,
+    edits: Array<{ page: number; rect: number[]; newText: string; fontName?: string | null; fontSize?: number | null; color?: number[] | null }>
+  ): Promise<{ success: boolean; outputPath?: string; results?: Array<{ index: number; ok: boolean; warning?: string | null; error?: string }>; error?: string }> {
+    if (!edits || edits.length === 0) {
+      return { success: false, error: '编辑列表为空' }
+    }
+    const limit = PythonService.EDIT_BATCH_LIMIT
+    if (edits.length <= limit) {
+      return this.runEditTextBatch(inputPath, outputPath, edits, 0)
+    }
+    const allResults: Array<{ index: number; ok: boolean; warning?: string | null; error?: string }> = []
+    const tempFiles: string[] = []
+    let currentInput = inputPath
+    try {
+      for (let start = 0; start < edits.length; start += limit) {
+        const chunk = edits.slice(start, start + limit)
+        const isLast = start + limit >= edits.length
+        const chunkOutput = isLast
+          ? outputPath
+          : path.join(os.tmpdir(), `pdfopen_batch_${Date.now()}_${start}.pdf`)
+        if (!isLast) tempFiles.push(chunkOutput)
+        const res = await this.runEditTextBatch(currentInput, chunkOutput, chunk, start)
+        if (!res.success) {
+          return { success: false, error: res.error, results: allResults }
+        }
+        allResults.push(...(res.results || []))
+        currentInput = chunkOutput
+      }
+      return { success: true, outputPath, results: allResults }
+    } finally {
+      for (const f of tempFiles) {
+        try { fsSync.unlinkSync(f) } catch { /* 忽略清理失败 */ }
+      }
+    }
+  }
+
+  private async runEditTextBatch(
+    inputPath: string,
+    outputPath: string,
+    edits: Array<{ page: number; rect: number[]; newText: string; fontName?: string | null; fontSize?: number | null; color?: number[] | null }>,
+    indexOffset: number
+  ): Promise<{ success: boolean; outputPath?: string; results?: Array<{ index: number; ok: boolean; warning?: string | null; error?: string }>; error?: string }> {
+    try {
+      const pythonBin = await this.findPythonExecutable()
+      const scriptPath = this.getBridgeScriptPath()
+      const args = [
+        scriptPath,
+        '--action', 'edit_text_batch',
+        '--input', inputPath,
+        '--output', outputPath,
+        '--edits', JSON.stringify(edits)
+      ]
+      const { stdout } = await execFileAsync(pythonBin, args, { encoding: 'utf-8' })
+      const parsed = this.extractJsonFromStdout(stdout)
+      if (parsed.success && Array.isArray(parsed.results)) {
+        parsed.results = parsed.results.map((r: any) => ({ ...r, index: r.index + indexOffset }))
+      }
+      return parsed
+    } catch (err: any) {
+      return { success: false, error: err.message || '批量正文编辑失败' }
     }
   }
 
