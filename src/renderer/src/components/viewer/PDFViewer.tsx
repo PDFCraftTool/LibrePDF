@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useDocumentStore, ViewerMode, cleanIpcError } from '../../stores/useDocumentStore'
 import { toast, useToastStore } from '../../stores/useToastStore'
+import { askForm } from '../../stores/usePromptStore'
 import { pdfjsLib, loadPdfDocument } from '../../lib/pdfjs'
 import {
   FileUp,
@@ -56,7 +57,12 @@ export const PDFViewer: React.FC = () => {
     pageTextBlocks,
     isLoadingBlocks,
     fetchPageTextBlocks,
-    saveTextEdit,
+    pendingEdits,
+    isApplyingEdits,
+    editFailures,
+    enqueueTextEdit,
+    clearPendingEdits,
+    applyPendingEdits,
     saveAnnotation,
     setActiveDialog
   } = useDocumentStore()
@@ -73,7 +79,17 @@ export const PDFViewer: React.FC = () => {
   const [editingText, setEditingText] = useState('')
   const [pageViewport, setPageViewport] = useState<{ width: number; height: number; scale: number } | null>(null)
   const [clientBlocks, setClientBlocks] = useState<any[]>([])
-  const [editedBlocks, setEditedBlocks] = useState<Record<string, string>>({})
+
+  // 正在编辑块的元数据快照（页码/矩形/字体属性），翻页与切块时用于自动入队
+  const editingMetaRef = useRef<{
+    page: number
+    rect: number[]
+    oldText: string
+    fontName: string | null
+    fontSize: number | null
+    color: number[] | null
+  } | null>(null)
+  const [failedHoverKey, setFailedHoverKey] = useState<string | null>(null)
 
   // 手绘与批注持久化图层
   const [isDrawing, setIsDrawing] = useState(false)
@@ -269,9 +285,25 @@ export const PDFViewer: React.FC = () => {
 
   useEffect(() => {
     if (viewerMode === 'edit_text' && activeTab && pdfDoc) {
-      loadTextBlocks()
+      // 翻页/重载前：未入队的草稿自动入队，不再静默丢弃
+      if (editingMetaRef.current && editingText.trim()) {
+        const meta = editingMetaRef.current
+        enqueueTextEdit({
+          page: meta.page,
+          blockId: editingBlockId || '',
+          rect: meta.rect,
+          oldText: meta.oldText,
+          newText: editingText,
+          fontName: meta.fontName,
+          fontSize: meta.fontSize,
+          color: meta.color
+        })
+      }
+      editingMetaRef.current = null
       setEditingBlockId(null)
+      loadTextBlocks()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewerMode, activeTab?.currentPage, pdfDoc])
 
   // 统一重绘持久化覆盖层（笔画、高亮、脱敏黑块）
@@ -454,13 +486,17 @@ export const PDFViewer: React.FC = () => {
     setLocalStrokes([])
     setLocalHighlights([])
     setLocalRedacts([])
-    setEditedBlocks({})
   }, [activeTab?.id, activeTab?.currentPage, activeTab?.data])
 
   // 键盘翻页与缩放快捷键（输入框内不拦截）
   useEffect(() => {
     if (!activeTab) return
     const onKeyDown = (e: KeyboardEvent) => {
+      if (useDocumentStore.getState().isApplyingEdits) return
+      if (e.key === 'Escape' && useDocumentStore.getState().viewerMode === 'edit_text') {
+        void exitEditTextModeRef.current()
+        return
+      }
       const target = e.target as HTMLElement | null
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return
       if (useDocumentStore.getState().activeDialog !== 'none') return
@@ -544,21 +580,66 @@ export const PDFViewer: React.FC = () => {
     containerRef.current?.scrollTo({ top: 0 })
   }, [activeTab?.id, activeTab?.currentPage])
 
-  // 提交正文修改
-  const handleCommitTextEdit = async (blockId: string) => {
-    if (!editingText.trim()) return
-    setEditedBlocks((prev) => ({ ...prev, [blockId]: editingText }))
-    const ok = await saveTextEdit(blockId, editingText)
-    if (!ok) {
-      // 保存失败时撤销本地覆盖显示，避免界面显示与实际文件不一致
-      setEditedBlocks((prev) => {
-        const next = { ...prev }
-        delete next[blockId]
-        return next
+  // 把当前 textarea 草稿入队（瞬时，本地操作）；无草稿或空文本则只清理状态
+  const enqueueCurrentDraft = () => {
+    const meta = editingMetaRef.current
+    if (editingBlockId && meta && editingText.trim()) {
+      enqueueTextEdit({
+        page: meta.page,
+        blockId: editingBlockId,
+        rect: meta.rect,
+        oldText: meta.oldText,
+        newText: editingText,
+        fontName: meta.fontName,
+        fontSize: meta.fontSize,
+        color: meta.color
       })
     }
+    editingMetaRef.current = null
     setEditingBlockId(null)
   }
+
+  const handleApplyEdits = async () => {
+    enqueueCurrentDraft()
+    await applyPendingEdits() // toast 由 store 内部统一处理
+  }
+
+  const exitEditTextMode = async () => {
+    enqueueCurrentDraft()
+    const { pendingEdits: queue, applyPendingEdits: apply, clearPendingEdits: clear } =
+      useDocumentStore.getState()
+    if (queue.length > 0) {
+      const res = await askForm({
+        title: tr('存在未应用的文字修改', 'Unapplied text edits'),
+        description: tr(
+          `队列中有 ${queue.length} 处修改尚未写入文档。`,
+          `${queue.length} queued edit(s) have not been applied yet.`
+        ),
+        fields: [
+          {
+            name: 'choice',
+            label: tr('退出方式', 'How to exit'),
+            type: 'segmented',
+            defaultValue: 'apply',
+            options: [
+              { value: 'apply', label: tr('应用并退出', 'Apply & exit') },
+              { value: 'discard', label: tr('放弃修改', 'Discard') }
+            ]
+          }
+        ],
+        confirmText: tr('确定', 'OK'),
+        cancelText: tr('取消', 'Cancel')
+      })
+      if (!res) return // 用户取消，留在编辑模式
+      if (res.choice === 'apply') await apply()
+      else clear()
+    }
+    setViewerMode('view')
+  }
+
+  // 全局 keydown 监听依赖数组仅含 activeTab?.id，用 ref 转发最新闭包，避免 Esc 时读到过期的草稿状态
+  const exitEditTextModeRef = useRef(exitEditTextMode)
+  exitEditTextModeRef.current = exitEditTextMode
 
   const handleSelectFile = async () => {
     const paths = await window.electronAPI.openFileDialog()
@@ -1087,7 +1168,7 @@ export const PDFViewer: React.FC = () => {
       {/* 顶部浮动模式切换条 */}
       <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-slate-900/90 border border-slate-700/80 rounded-full px-2 py-1 flex items-center space-x-1 shadow-2xl backdrop-blur-md text-xs select-none">
         <button
-          onClick={() => setViewerMode('view')}
+          onClick={() => (viewerMode === 'edit_text' ? void exitEditTextMode() : setViewerMode('view'))}
           className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-all ${
             viewerMode === 'view' ? 'bg-brand-600 text-white font-medium shadow-sm' : 'text-slate-300 hover:text-white'
           }`}
@@ -1161,9 +1242,45 @@ export const PDFViewer: React.FC = () => {
           ) : (
             <>
               <Type className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-              <span>{tr('点击蓝色虚线框即可原地修改文字', 'Click a dashed blue box to edit its text in place')}</span>
+              <span>{tr('点击蓝色虚线框修改文字，改完统一应用', 'Click a dashed box to edit; apply all changes at once')}</span>
             </>
           )}
+          {pendingEdits.length > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full bg-blue-600/30 text-blue-100 text-[11px] font-medium">
+              {tr(`${pendingEdits.length} 处待应用`, `${pendingEdits.length} pending`)}
+            </span>
+          )}
+          <button
+            onClick={handleApplyEdits}
+            disabled={
+              isApplyingEdits ||
+              (pendingEdits.length === 0 && !(editingBlockId && editingText.trim())) ||
+              (clientBlocks.length > 0 && pageTextBlocks.length === 0)
+            }
+            title={
+              clientBlocks.length > 0 && pageTextBlocks.length === 0
+                ? tr('当前为 PDF.js 回退模式，批量应用需要 Python 环境', 'Batch apply requires the Python sidecar (currently in PDF.js fallback)')
+                : undefined
+            }
+            className="ml-1 px-2.5 py-0.5 rounded-full bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] font-medium"
+          >
+            {tr('应用修改', 'Apply')}
+            {pendingEdits.length > 0 ? ` (${pendingEdits.length})` : ''}
+          </button>
+          {pendingEdits.length > 0 && (
+            <button
+              onClick={() => clearPendingEdits()}
+              className="px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px]"
+            >
+              {tr('放弃全部', 'Discard all')}
+            </button>
+          )}
+          <button
+            onClick={exitEditTextMode}
+            className="px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px]"
+          >
+            {tr('完成', 'Done')}
+          </button>
         </div>
       )}
 
@@ -1258,18 +1375,32 @@ export const PDFViewer: React.FC = () => {
                 const height = (blk.rect[3] - blk.rect[1]) * scale
 
                 const isEditing = editingBlockId === blk.id
-                const overrideText = editedBlocks[blk.id]
+                const curPage = activeTab?.currentPage ?? 1
+                const pending = pendingEdits.find((e) => e.page === curPage && e.blockId === blk.id)
+                const failureMsg = editFailures[`${curPage}:${blk.id}`]
+                const overrideText = pending?.newText
                 const displayText = overrideText !== undefined ? overrideText : blk.text
 
                 return (
                   <div
                     key={blk.id}
                     onClick={() => {
-                      if (!isEditing) {
-                        setEditingBlockId(blk.id)
-                        setEditingText(displayText)
+                      if (isEditing || isApplyingEdits) return
+                      enqueueCurrentDraft() // 切换块前把正在编辑的内容入队
+                      setEditingBlockId(blk.id)
+                      setEditingText(overrideText !== undefined ? overrideText : blk.text)
+                      editingMetaRef.current = {
+                        page: activeTab?.currentPage ?? 1,
+                        rect: blk.rect,
+                        oldText: blk.text,
+                        fontName: blk.fontName ?? null,
+                        fontSize: blk.fontSize ?? null,
+                        color: blk.color ?? null
                       }
                     }}
+                    title={failureMsg || undefined}
+                    onMouseEnter={() => failureMsg && setFailedHoverKey(`${curPage}:${blk.id}`)}
+                    onMouseLeave={() => setFailedHoverKey(null)}
                     style={{
                       left: `${left}px`,
                       top: `${top}px`,
@@ -1280,7 +1411,9 @@ export const PDFViewer: React.FC = () => {
                       isEditing
                         ? 'z-30 bg-white ring-2 ring-blue-500 shadow-2xl p-1.5'
                         : overrideText !== undefined
-                        ? 'bg-white text-slate-900 border border-emerald-500/80 shadow-sm px-1 font-sans text-xs flex items-center'
+                        ? failureMsg
+                          ? 'bg-white text-slate-900 border border-rose-500 shadow-sm px-1 font-sans text-xs flex items-center'
+                          : 'bg-white text-slate-900 border border-emerald-500/80 shadow-sm px-1 font-sans text-xs flex items-center'
                         : 'border border-blue-400/50 hover:border-blue-600 hover:bg-blue-500/15'
                     }`}
                   >
@@ -1297,6 +1430,7 @@ export const PDFViewer: React.FC = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
+                              editingMetaRef.current = null
                               setEditingBlockId(null)
                             }}
                             className="p-1 rounded hover:bg-slate-100 text-slate-500"
@@ -1307,12 +1441,12 @@ export const PDFViewer: React.FC = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
-                              handleCommitTextEdit(blk.id)
+                              enqueueCurrentDraft()
                             }}
                             className="flex items-center space-x-1 px-2.5 py-0.5 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-medium shadow-sm"
                           >
                             <Check className="w-3 h-3" />
-                            <span>{tr('保存', 'Save')}</span>
+                            <span>{tr('加入队列', 'Queue')}</span>
                           </button>
                         </div>
                       </div>
@@ -1326,6 +1460,18 @@ export const PDFViewer: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* 批量应用进度遮罩：锁定全部交互 */}
+      {isApplyingEdits && (
+        <div className="absolute inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl px-6 py-4 flex items-center space-x-3 shadow-2xl">
+            <div className="w-4 h-4 rounded-full border-2 border-blue-400 border-t-transparent animate-spin" />
+            <span className="text-sm text-slate-200">
+              {tr('正在应用文字修改…', 'Applying text edits…')}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
