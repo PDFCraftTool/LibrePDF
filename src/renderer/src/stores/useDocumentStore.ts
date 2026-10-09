@@ -359,6 +359,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
     if (!activeTab || pendingEdits.length === 0 || isApplyingEdits) {
       return { applied: 0, failed: 0 }
     }
+    const startedTabId = activeTabId
     set({ isApplyingEdits: true, editFailures: {} })
     try {
       const outputPath = await window.electronAPI.getTempPdfPath('pdfopen_text_batch')
@@ -383,13 +384,31 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
           }
         }
       }
+      // 批量 python 处理期间用户可能切换/关闭标签页：applyModifiedPDF 按当时的
+      // activeTabId 落盘，必须校验目标未变，否则结果会写进错误文档（临时文件废弃即可）
+      if (get().activeTabId !== startedTabId) {
+        return {
+          applied: 0,
+          failed: pendingEdits.length,
+          error: tr('文档已切换，修改未应用', 'Document switched, edits not applied')
+        }
+      }
       // 一次批量 = 一条 undo 历史
       const reloadOk = await get().applyModifiedPDF(res.outputPath, { silent: true })
       if (!reloadOk) return { applied: 0, failed: pendingEdits.length }
       await get().fetchPageTextBlocks()
+      // fetchPageTextBlocks 亦为异步，落状态前再次确认文档未切换，避免污染新文档的队列
+      if (get().activeTabId !== startedTabId) {
+        return {
+          applied: 0,
+          failed: pendingEdits.length,
+          error: tr('文档已切换，修改未应用', 'Document switched, edits not applied')
+        }
+      }
 
       // 失败项 rect 可能因同页先前编辑的文本回流而过时：按 oldText 在新块中重新对位；
-      // 对不上的项从队列移除并提示重新选择，避免用旧坐标重放擦错位置
+      // 对不上的项从队列移除并提示重新选择，避免用旧坐标重放擦错位置。
+      // 失败项在其他页时无法本地校验 rect 是否过时（pageTextBlocks 仅含当前页），按原样保留，重放时由 Python 侧校验兜底。
       const cur = get()
       const curTab = cur.tabs.find((t) => t.id === cur.activeTabId)
       const kept: TextEditItem[] = []
@@ -397,6 +416,8 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
         if (curTab && item.page === curTab.currentPage) {
           const match = cur.pageTextBlocks.find((b) => b.text === item.oldText)
           if (match) {
+            // 已对位到新块，旧 blockId 的失败标记作废（本次是重试而非展示失败）
+            delete failures[`${item.page}:${item.blockId}`]
             kept.push({ ...item, blockId: match.id, rect: match.rect })
             continue
           }
@@ -408,7 +429,17 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
         }
         kept.push(item)
       }
-      set({ pendingEdits: kept, editFailures: failures })
+      // 合并而非覆盖：应用期间用户可能新入队/重改（enqueueTextEdit 对未触及项保留引用，
+      // 被覆盖项是新对象），按引用与快照区分；同页同块以在飞项为准
+      set((s) => {
+        const snapshot = new Set(pendingEdits)
+        const inFlight = s.pendingEdits.filter((e) => !snapshot.has(e))
+        const inFlightKeys = new Set(inFlight.map((e) => `${e.page}:${e.blockId}`))
+        return {
+          pendingEdits: [...kept.filter((e) => !inFlightKeys.has(`${e.page}:${e.blockId}`)), ...inFlight],
+          editFailures: { ...s.editFailures, ...failures }
+        }
+      })
 
       const summary =
         tr(`成功应用 ${applied} 处修改`, `${applied} edit(s) applied`) +
@@ -419,9 +450,11 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
         toast.success(tr('文字修改已应用', 'Text edits applied'), summary)
       }
       return { applied, failed: kept.length }
-    } catch (err) {
+    } catch (err: any) {
       console.error('applyPendingEdits error:', err)
-      return { applied: 0, failed: pendingEdits.length, error: String(err) }
+      const message = cleanIpcError(err)
+      toast.error(tr('文字修改失败', 'Failed to edit text'), message)
+      return { applied: 0, failed: pendingEdits.length, error: message }
     } finally {
       set({ isApplyingEdits: false })
     }
