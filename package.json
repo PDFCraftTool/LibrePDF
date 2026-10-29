@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "description": "The Local-First, AI-Native, All-in-One PDF Powerhouse for Global Users",
-  "author": "LibrePDF Team",
+  "author": "LibrePDF Team <contact@librepdf.org>",
   "license": "Apache-2.0",
   "main": "dist-electron/main/index.js",
   "scripts": {
@@ -12,10 +12,10 @@
     "typecheck": "tsc && tsc -p tsconfig.node.json --noEmit",
     "preview": "vite preview",
     "electron:dev": "vite",
-    "electron:build": "npm run typecheck && vite build && electron-builder",
-    "electron:build:win": "npm run typecheck && vite build && electron-builder --win",
-    "electron:build:mac": "npm run typecheck && vite build && electron-builder --mac",
-    "electron:build:linux": "npm run typecheck && vite build && electron-builder --linux",
+    "electron:build": "npm run typecheck && vite build && electron-builder --publish never",
+    "electron:build:win": "npm run typecheck && vite build && electron-builder --win --publish never",
+    "electron:build:mac": "npm run typecheck && vite build && electron-builder --mac --publish never",
+    "electron:build:linux": "npm run typecheck && vite build && electron-builder --linux --publish never",
     "test": "tsx tests/pdfEngine.test.ts && tsx tests/pythonSidecar.test.ts && tsx tests/bentoStirlingEngine.test.ts"
   },
   "dependencies": {

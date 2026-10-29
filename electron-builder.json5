@@ -64,6 +64,7 @@
     "hardenedRuntime": false
   },
   "linux": {
+    "maintainer": "LibrePDF Team <contact@librepdf.org>",
     "target": [
       {
         "target": "AppImage",
