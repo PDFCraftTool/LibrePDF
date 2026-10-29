@@ -161,7 +161,7 @@ function createWindow() {
   logToFile(`Html: ${htmlPath}, exists: ${fs.existsSync(htmlPath)}`)
 
   mainWindow = new BrowserWindow({
-    width: 1360,
+    width: 1440,
     height: 900,
     minWidth: 1024,
     minHeight: 700,
