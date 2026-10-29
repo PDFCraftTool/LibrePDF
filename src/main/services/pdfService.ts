@@ -891,8 +891,8 @@ export class PDFService {
       pdfDoc.setAuthor('')
       pdfDoc.setSubject('')
       pdfDoc.setKeywords([])
-      pdfDoc.setProducer('PDFOpen Studio Sanitizer')
-      pdfDoc.setCreator('PDFOpen Studio')
+      pdfDoc.setProducer('LibrePDF Studio Sanitizer')
+      pdfDoc.setCreator('LibrePDF Studio')
       pdfDoc.setCreationDate(new Date(0))
       pdfDoc.setModificationDate(new Date(0))
 

@@ -51,8 +51,8 @@ export const HotFolderDialog: React.FC = () => {
         const docs = await window.electronAPI.getSystemPath('documents')
         if (cancelled) return
         const sep = docs.includes('\\') ? '\\' : '/'
-        setInputDir(`${docs}${sep}PDFOpen HotFolder${sep}input`)
-        setOutputDir(`${docs}${sep}PDFOpen HotFolder${sep}output`)
+        setInputDir(`${docs}${sep}LibrePDF HotFolder${sep}input`)
+        setOutputDir(`${docs}${sep}LibrePDF HotFolder${sep}output`)
       } catch {
         // 获取失败时保持为空，由用户选择
       }

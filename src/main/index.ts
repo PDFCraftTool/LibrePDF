@@ -90,7 +90,7 @@ function cleanupIssuedTempFiles() {
 function sweepStaleTempFiles() {
   try {
     const tempDir = app.getPath('temp')
-    const pattern = /^(pdfopen|attachment|bates|compress|repair|overlay|imposition|numbered|rotated|watermark|effect|toc)_\d+_[a-z0-9]+\.pdf$/i
+    const pattern = /^(librepdf|pdfopen|attachment|bates|compress|repair|overlay|imposition|numbered|rotated|watermark|effect|toc)_\d+_[a-z0-9]+\.pdf$/i
     const cutoff = Date.now() - 24 * 60 * 60 * 1000
     for (const name of fs.readdirSync(tempDir)) {
       if (!pattern.test(name)) continue
@@ -111,7 +111,7 @@ function isAllowedTempSource(tempPath: string): boolean {
   if (issuedTempPaths.has(resolved.toLowerCase())) return true
   // temp 目录下 pdfopen_ 前缀的文件（兼容未经 Set 记录的工作副本）
   const tempDir = path.resolve(app.getPath('temp')).toLowerCase()
-  if (resolved.toLowerCase().startsWith(tempDir + path.sep) && path.basename(resolved).startsWith('pdfopen_')) return true
+  if (resolved.toLowerCase().startsWith(tempDir + path.sep) && (path.basename(resolved).startsWith('librepdf_') || path.basename(resolved).startsWith('pdfopen_'))) return true
   // 正常用户文档路径（“另存为”的源文件）：必须是已存在的普通文件
   try {
     return fs.statSync(resolved).isFile()
@@ -165,7 +165,7 @@ function createWindow() {
     height: 900,
     minWidth: 1024,
     minHeight: 700,
-    title: 'PDFOpen Studio',
+    title: 'LibrePDF Studio',
     titleBarStyle: 'hidden',
     // 与渲染进程 TitleBar（h-11 = 44px，背景 #0b1112）保持一致，避免窗口按钮区出现色块和高度错位
     backgroundColor: '#0b1112',
@@ -221,7 +221,7 @@ function createWindow() {
       buttons: zh ? ['放弃修改并退出', '取消'] : ['Discard changes and quit', 'Cancel'],
       defaultId: 1,
       cancelId: 1,
-      title: 'PDFOpen Studio',
+      title: 'LibrePDF Studio',
       message: zh ? '有文档包含未保存的修改' : 'Some documents have unsaved changes',
       detail: zh
         ? '退出后这些修改将会丢失。若要保留，请取消后按 Ctrl+S 保存。'
@@ -360,7 +360,7 @@ function setupIpcHandlers() {
   // 1.1 临时工作副本与文件写回支持
   ipcMain.handle('file:getTempPdfPath', async (_, prefix?: string) => {
     const tempDir = app.getPath('temp')
-    const fileName = `${prefix || 'pdfopen_work'}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.pdf`
+    const fileName = `${prefix || 'librepdf_work'}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.pdf`
     const full = path.join(tempDir, fileName)
     // 记录已签发路径，退出或窗口全部关闭时统一清理
     issuedTempPaths.add(path.resolve(full).toLowerCase())

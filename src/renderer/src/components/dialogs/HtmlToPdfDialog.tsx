@@ -9,7 +9,7 @@ export const HtmlToPdfDialog: React.FC = () => {
 
   const [mode, setMode] = useState<'url' | 'html'>('url')
   const [url, setUrl] = useState('https://')
-  const [htmlContent, setHtmlContent] = useState('<h1>Hello PDFOpen Studio</h1>\n<p>Native Chromium Webpage to PDF</p>')
+  const [htmlContent, setHtmlContent] = useState('<h1>Hello LibrePDF Studio</h1>\n<p>Native Chromium Webpage to PDF</p>')
   const [pageSize, setPageSize] = useState<'A4' | 'A3' | 'Letter'>('A4')
   const [landscape, setLandscape] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)

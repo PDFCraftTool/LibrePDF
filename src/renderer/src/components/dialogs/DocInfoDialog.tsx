@@ -290,7 +290,7 @@ export const DocInfoDialog: React.FC = () => {
                   type="text"
                   value={creator}
                   onChange={(e) => setCreator(e.target.value)}
-                  placeholder={tr('例如：PDFOpen Studio', 'e.g. PDFOpen Studio')}
+                  placeholder={tr('例如：LibrePDF Studio', 'e.g. LibrePDF Studio')}
                   className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-slate-100 focus:outline-none focus:border-brand-500 font-mono text-[11px]"
                 />
               </div>

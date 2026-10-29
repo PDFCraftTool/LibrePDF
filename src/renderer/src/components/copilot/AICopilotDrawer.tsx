@@ -158,7 +158,7 @@ export const AICopilotDrawer: React.FC = () => {
                 ) : (
                   <>
                     <Bot className="w-3 h-3 text-brand-400" />
-                    <span>PDFOpen Agent</span>
+                    <span>LibrePDF Agent</span>
                   </>
                 )}
               </div>

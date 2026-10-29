@@ -26,7 +26,7 @@ export const TitleBar: React.FC = () => {
         <div className="w-6 h-6 rounded-md bg-gradient-to-br from-brand-500 to-teal-300 flex items-center justify-center shadow-md shadow-brand-950/40">
           <FileText className="w-3.5 h-3.5 text-white" />
         </div>
-        <span className="font-bold text-xs tracking-wider text-slate-200">PDFOPEN</span>
+        <span className="font-bold text-xs tracking-wider text-slate-200">LIBREPDF</span>
         <span className="text-[10px] px-1.5 py-0.5 rounded bg-brand-950/80 border border-brand-800/60 text-brand-400 flex items-center gap-1">
           <ShieldCheck className="w-2.5 h-2.5" />
           Local-First

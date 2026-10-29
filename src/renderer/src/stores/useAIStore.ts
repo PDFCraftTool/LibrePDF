@@ -24,13 +24,13 @@ interface AIState {
   setBaseUrl: (baseUrl: string) => void
 }
 
-const AI_CONFIG_KEY = 'pdfopen.ai.config'
+const AI_CONFIG_KEY = 'librepdf.ai.config'
 
 /** 欢迎语按当前语言生成（抽屉中渲染 id === 'welcome' 的消息时也会调用，保证切换语言后同步） */
 export const getWelcomeMessage = () =>
   tr(
-    '你好！我是 PDFOpen 智能体助手，可以通过自然语言帮你调用各项 PDF 功能。所有数据都在本机离线处理，不会上传。请直接告诉我你想做什么。',
-    "Hi, I'm the PDFOpen assistant. I can run PDF tools for you from plain-language requests. Everything is processed offline on this machine and nothing is uploaded. Tell me what you'd like to do."
+    '你好！我是 LibrePDF 智能体助手，可以通过自然语言帮你调用各项 PDF 功能。所有数据都在本机离线处理，不会上传。请直接告诉我你想做什么。',
+    "Hi, I'm the LibrePDF assistant. I can run PDF tools for you from plain-language requests. Everything is processed offline on this machine and nothing is uploaded. Tell me what you'd like to do."
   )
 
 /** 读取用户上次选择的模型与服务地址 */

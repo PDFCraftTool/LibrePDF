@@ -1,13 +1,14 @@
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "com.pdfopen.studio",
-  "productName": "PDFOpen Studio",
+  "appId": "com.librepdf.studio",
+  "productName": "LibrePDF Studio",
   "directories": {
     "output": "release"
   },
+  "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
   "files": [
-    "dist",
-    "dist-electron"
+    "dist/**/*",
+    "dist-electron/**/*"
   ],
   "extraResources": [
     {
@@ -16,7 +17,6 @@
       "filter": ["**/*"]
     },
     {
-      // pdf.js 字符映射与标准字体，供离线渲染中日韩等文档使用（主进程 pdfjs:asset 读取）
       "from": "node_modules/pdfjs-dist/cmaps",
       "to": "pdfjs/cmaps"
     },
@@ -48,5 +48,32 @@
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
     "deleteAppDataOnUninstall": false
+  },
+  "mac": {
+    "target": [
+      {
+        "target": "dmg",
+        "arch": ["x64", "arm64"]
+      },
+      {
+        "target": "zip",
+        "arch": ["x64", "arm64"]
+      }
+    ],
+    "category": "public.app-category.productivity",
+    "hardenedRuntime": false
+  },
+  "linux": {
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": ["x64"]
+      },
+      {
+        "target": "deb",
+        "arch": ["x64"]
+      }
+    ],
+    "category": "Office;Utility"
   }
 }

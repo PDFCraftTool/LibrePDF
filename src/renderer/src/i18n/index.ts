@@ -5,7 +5,7 @@ const resources = {
   zh: {
     translation: {
       app: {
-        name: 'PDFOpen Studio',
+        name: 'LibrePDF Studio',
         tagline: '本地优先 · AI 智能驱动 · 全能 PDF 工作台',
         noFileOpen: '暂无打开的 PDF 文档',
         openFilePrompt: '拖拽 PDF 到此处，或点击按钮选择文件',
@@ -86,7 +86,7 @@ const resources = {
   en: {
     translation: {
       app: {
-        name: 'PDFOpen Studio',
+        name: 'LibrePDF Studio',
         tagline: 'Local-First, AI-Native, All-in-One PDF Powerhouse',
         noFileOpen: 'No PDF Document Opened',
         openFilePrompt: 'Drag and drop a PDF file here, or click to browse',
@@ -166,7 +166,7 @@ const resources = {
   }
 }
 
-const LANG_STORAGE_KEY = 'pdfopen.language'
+const LANG_STORAGE_KEY = 'librepdf.language'
 
 /** 首次启动按系统语言选择，之后记住用户的选择 */
 const detectInitialLanguage = (): 'zh' | 'en' => {
