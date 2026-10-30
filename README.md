@@ -12,8 +12,6 @@
 [![React](https://img.shields.io/badge/React-19.0-61dafb.svg?style=flat-square&logo=react)]()
 [![Electron](https://img.shields.io/badge/Electron-34.5-47848F.svg?style=flat-square&logo=electron)]()
 
-[English](README.md) | [简体中文](README_zh.md)
-
 <p align="center">
   <strong>100% Privacy-Preserving • 53+ Comprehensive Atomic Tools • Offline AI Copilot • Visual DAG Workflow Studio • In-Place Editing</strong>
 </p>
