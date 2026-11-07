@@ -4,7 +4,7 @@
 
 **The Local-First, AI-Native, All-in-One PDF Powerhouse for Global Users**
 
-[![Release](https://img.shields.io/badge/Release-v0.1.0-blue.svg?style=flat-square)](https://github.com/PDFCraftTool/LibrePDF/releases)
+[![Release](https://img.shields.io/badge/Release-v0.2.0-blue.svg?style=flat-square)](https://github.com/PDFCraftTool/LibrePDF/releases)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-green.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-orange.svg?style=flat-square)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
