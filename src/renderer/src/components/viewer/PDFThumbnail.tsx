@@ -129,10 +129,10 @@ export const PDFThumbnail: React.FC<PDFThumbnailProps> = ({
         isDragging ? 'opacity-40' : ''
       } ${
         isCurrent
-          ? 'bg-brand-500/10 border-brand-500/70 shadow-md ring-2 ring-brand-500/30'
+          ? 'bg-blue-50/80 border-blue-400 ring-2 ring-blue-400/30 shadow-xs'
           : isSelected
-            ? 'bg-brand-500/5 border-brand-400/50 ring-1 ring-brand-400/30'
-            : 'bg-slate-900/40 border-slate-800/80 hover:bg-slate-800/70 hover:border-slate-700'
+            ? 'bg-blue-50/40 border-blue-300 ring-1 ring-blue-300/30'
+            : 'bg-slate-100/40 border-slate-200 hover:bg-white hover:border-slate-300 hover:shadow-xs'
       }`}
     >
       {/* 拖拽插入位置指示线 */}
@@ -144,7 +144,7 @@ export const PDFThumbnail: React.FC<PDFThumbnailProps> = ({
         />
       )}
       <div
-        className="w-[116px] bg-white rounded-md shadow-md border border-slate-600/40 relative overflow-hidden flex items-center justify-center transition-transform group-hover:scale-[1.02]"
+        className="w-[116px] bg-white rounded shadow-sm border border-slate-200 relative overflow-hidden flex items-center justify-center transition-transform group-hover:scale-[1.02]"
         style={{ minHeight: `${Math.round(THUMB_WIDTH * (aspectRatio || 1.414))}px` }}
       >
         {!isRendered && (
@@ -159,10 +159,10 @@ export const PDFThumbnail: React.FC<PDFThumbnailProps> = ({
         <span
           className={`text-xs font-mono font-medium px-2.5 py-0.5 rounded-full transition-colors ${
             isCurrent
-              ? 'bg-brand-600 text-white shadow-sm'
+              ? 'bg-blue-600 text-white shadow-xs'
               : isSelected
-                ? 'bg-brand-500/30 text-brand-100'
-                : 'text-slate-400 group-hover:text-slate-200 group-hover:bg-slate-800'
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-slate-500 group-hover:text-slate-800 group-hover:bg-slate-200/60'
           }`}
         >
           {pageNum}

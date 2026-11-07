@@ -168,11 +168,11 @@ function createWindow() {
     title: 'LibrePDF Studio',
     titleBarStyle: 'hidden',
     // 与渲染进程 TitleBar（h-11 = 44px，背景 #0b1112）保持一致，避免窗口按钮区出现色块和高度错位
-    backgroundColor: '#0b1112',
+    backgroundColor: '#f8fafc',
     titleBarOverlay: {
-      color: '#0b1112',
-      symbolColor: '#94a3b8',
-      height: 44
+      color: '#f8fafc',
+      symbolColor: '#334155',
+      height: 40
     },
     show: true,
     webPreferences: {

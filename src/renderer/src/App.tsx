@@ -80,7 +80,7 @@ export const App: React.FC = () => {
   }, [setActiveDialog, toggleWorkflow, isWorkflowOpen])
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 font-sans select-none">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-100 font-sans select-none text-slate-800">
       {/* 顶部多标签自定义标题栏 */}
       <TitleBar />
 

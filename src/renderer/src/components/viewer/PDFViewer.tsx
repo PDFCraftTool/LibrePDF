@@ -794,14 +794,14 @@ export const PDFViewer: React.FC = () => {
             className={`w-full min-h-48 rounded-2xl p-8 cursor-pointer transition-all duration-200 group flex flex-col items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 ${
               isDragActive
                 ? 'border-2 border-brand-300 bg-brand-500/10 shadow-[0_0_48px_-20px_rgba(45,212,191,0.5)]'
-                : 'border border-dashed border-slate-600 bg-slate-900/55 hover:border-brand-400/70 hover:bg-slate-900/90 shadow-[0_24px_80px_-48px_rgba(0,0,0,0.9)]'
+                : 'border-2 border-dashed border-slate-300 bg-white hover:border-blue-500 hover:bg-blue-50/20 shadow-xs'
             }`}
           >
-            <div className="w-14 h-14 rounded-2xl bg-brand-500/10 border border-brand-300/20 flex items-center justify-center text-brand-200 group-hover:bg-brand-500/15 transition-colors">
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition-colors">
               <FileUp className="w-6 h-6" strokeWidth={1.7} />
             </div>
             <div className="text-center">
-              <span className="text-base font-semibold text-slate-100 group-hover:text-brand-100 block">
+              <span className="text-base font-semibold text-slate-800 group-hover:text-blue-600 block">
                 {isDragActive ? tr('松开鼠标以打开 PDF', 'Release to open the PDF') : tr('打开 PDF 文档', 'Open a PDF')}
               </span>
               <span className="text-xs text-slate-400 mt-1.5 block">
@@ -814,7 +814,7 @@ export const PDFViewer: React.FC = () => {
           {/* 全能工具箱矩阵大 Banner 按钮 */}
           <div
             onClick={() => setActiveDialog('toolbox')}
-            className="w-full p-4 rounded-2xl bg-slate-900/65 hover:bg-slate-900 border border-slate-700/80 hover:border-brand-400/40 cursor-pointer transition-all shadow-lg shadow-black/10 flex items-center justify-between group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+            className="w-full p-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-400 cursor-pointer transition-all shadow-xs flex items-center justify-between group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             role="button"
             tabIndex={0}
             onKeyDown={(event) => {
@@ -827,10 +827,10 @@ export const PDFViewer: React.FC = () => {
               </div>
               <div className="text-left">
                 <div className="flex items-center space-x-2">
-                    <span className="font-semibold text-sm text-slate-100 group-hover:text-brand-100 transition-colors">
+                    <span className="font-semibold text-sm text-slate-800 group-hover:text-blue-600 transition-colors">
                     {tr('打开工具箱', 'Open toolbox')}
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-semibold">
+                  <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-semibold">
                     {tr('53+ 款工具', '53+ tools')}
                   </span>
                 </div>
@@ -839,7 +839,7 @@ export const PDFViewer: React.FC = () => {
                 </p>
               </div>
             </div>
-            <span className="text-xs text-brand-200 font-medium group-hover:translate-x-1 transition-transform pr-2">
+            <span className="text-xs text-blue-600 font-medium group-hover:translate-x-1 transition-transform pr-2">
               {tr('浏览工具箱', 'Browse toolbox')} →
             </span>
           </div>
@@ -858,7 +858,7 @@ export const PDFViewer: React.FC = () => {
               {/* 1. PDF 转 Word */}
               <div
                 onClick={handleQuickPdfToWord}
-                className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-blue-500 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white border border-slate-200 hover:border-blue-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
               >
                 <div className="flex items-center justify-between">
                   <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 group-hover:scale-105 transition-transform">
@@ -869,7 +869,7 @@ export const PDFViewer: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-200 group-hover:text-blue-300 transition-colors">
+                  <h4 className="text-xs font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
                     {tr('PDF 转可编辑 Word', 'PDF to editable Word')}
                   </h4>
                   <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
@@ -892,7 +892,7 @@ export const PDFViewer: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-200 group-hover:text-rose-300 transition-colors">
+                  <h4 className="text-xs font-semibold text-slate-800 group-hover:text-rose-600 transition-colors">
                     {tr('PDF 逐页导出为图片', 'Export pages as images')}
                   </h4>
                   <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
@@ -938,7 +938,7 @@ export const PDFViewer: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-200 group-hover:text-purple-300 transition-colors">
+                  <h4 className="text-xs font-semibold text-slate-800 group-hover:text-purple-600 transition-colors">
                     {tr('书签目录编辑器', 'Bookmark editor')}
                   </h4>
                   <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
@@ -961,7 +961,7 @@ export const PDFViewer: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-200 group-hover:text-emerald-300 transition-colors">
+                  <h4 className="text-xs font-semibold text-slate-800 group-hover:text-emerald-600 transition-colors">
                     {tr('P12 证书数字签名', 'Digital signature with P12')}
                   </h4>
                   <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
@@ -984,7 +984,7 @@ export const PDFViewer: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-200 group-hover:text-indigo-300 transition-colors">
+                  <h4 className="text-xs font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">
                     {tr('AcroForm 表单设计器', 'AcroForm designer')}
                   </h4>
                   <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
@@ -1007,7 +1007,7 @@ export const PDFViewer: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-200 group-hover:text-amber-300 transition-colors">
+                  <h4 className="text-xs font-semibold text-slate-800 group-hover:text-amber-600 transition-colors">
                     {tr('按空白页自动拆分', 'Split by blank pages')}
                   </h4>
                   <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
@@ -1030,7 +1030,7 @@ export const PDFViewer: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-200 group-hover:text-cyan-300 transition-colors">
+                  <h4 className="text-xs font-semibold text-slate-800 group-hover:text-cyan-600 transition-colors">
                     {tr('按文字方向自动旋转页面', 'Auto-rotate by text direction')}
                   </h4>
                   <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
@@ -1053,7 +1053,7 @@ export const PDFViewer: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-200 group-hover:text-teal-300 transition-colors">
+                  <h4 className="text-xs font-semibold text-slate-800 group-hover:text-teal-600 transition-colors">
                     {tr('双文档差异比对', 'Compare two documents')}
                   </h4>
                   <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
@@ -1099,7 +1099,7 @@ export const PDFViewer: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-200 group-hover:text-emerald-300 transition-colors">
+                  <h4 className="text-xs font-semibold text-slate-800 group-hover:text-emerald-600 transition-colors">
                     {tr('表格还原为 Excel (.xlsx)', 'Tables to Excel (.xlsx)')}
                   </h4>
                   <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
@@ -1135,26 +1135,26 @@ export const PDFViewer: React.FC = () => {
 
           {/* 底部三大保障徽标 */}
           <div className="grid grid-cols-3 gap-3 w-full pt-1">
-            <div className="bg-slate-900/40 border border-slate-800/60 rounded-xl p-3 text-left flex items-center space-x-2.5">
+            <div className="bg-white border border-slate-200 shadow-xs rounded-xl p-3 text-left flex items-center space-x-2.5">
               <ShieldCheck className="w-4 h-4 text-brand-400 shrink-0" />
               <div>
-                <span className="text-xs font-medium text-slate-200 block">{tr('离线运行', 'Works offline')}</span>
+                <span className="text-xs font-medium text-slate-800 block">{tr('离线运行', 'Works offline')}</span>
                 <span className="text-[10px] text-slate-500">{tr('无网络遥测，可商用', 'No telemetry, safe for commercial use')}</span>
               </div>
             </div>
 
-            <div className="bg-slate-900/40 border border-slate-800/60 rounded-xl p-3 text-left flex items-center space-x-2.5">
+            <div className="bg-white border border-slate-200 shadow-xs rounded-xl p-3 text-left flex items-center space-x-2.5">
               <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
               <div>
-                <span className="text-xs font-medium text-slate-200 block">{tr('AI 智能助手', 'AI Copilot')}</span>
+                <span className="text-xs font-medium text-slate-800 block">{tr('AI 智能助手', 'AI Copilot')}</span>
                 <span className="text-[10px] text-slate-500">{tr('连接本地 Ollama，用自然语言操作', 'Local Ollama, plain-language commands')}</span>
               </div>
             </div>
 
-            <div className="bg-slate-900/40 border border-slate-800/60 rounded-xl p-3 text-left flex items-center space-x-2.5">
+            <div className="bg-white border border-slate-200 shadow-xs rounded-xl p-3 text-left flex items-center space-x-2.5">
               <LayoutTemplate className="w-4 h-4 text-purple-400 shrink-0" />
               <div>
-                <span className="text-xs font-medium text-slate-200 block">{tr('可视化连线工作流', 'Visual workflows')}</span>
+                <span className="text-xs font-medium text-slate-800 block">{tr('可视化连线工作流', 'Visual workflows')}</span>
                 <span className="text-[10px] text-slate-500">{tr('基于节点的批处理流水线', 'Node-based batch pipelines')}</span>
               </div>
             </div>
@@ -1165,13 +1165,13 @@ export const PDFViewer: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 flex overflow-hidden relative bg-slate-950">
+    <div className="flex-1 flex overflow-hidden relative bg-[#eaedf1]">
       {/* 顶部浮动模式切换条 */}
-      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-slate-900/90 border border-slate-700/80 rounded-full px-2 py-1 flex items-center space-x-1 shadow-2xl backdrop-blur-md text-xs select-none">
+      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-white/95 border border-slate-200/90 rounded-lg p-1 flex items-center space-x-1 shadow-sm backdrop-blur-sm text-xs select-none text-slate-700">
         <button
           onClick={() => (viewerMode === 'edit_text' ? void exitEditTextMode() : setViewerMode('view'))}
-          className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-all ${
-            viewerMode === 'view' ? 'bg-brand-600 text-white font-medium shadow-sm' : 'text-slate-300 hover:text-white'
+          className={`flex items-center space-x-1 px-2.5 py-1 rounded-md transition-all ${
+            viewerMode === 'view' ? 'bg-blue-600 text-white font-medium shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
           <MousePointer className="w-3.5 h-3.5" />
@@ -1180,7 +1180,7 @@ export const PDFViewer: React.FC = () => {
 
         <button
           onClick={() => setViewerMode('edit_text')}
-          className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-all ${
+          className={`flex items-center space-x-1 px-2.5 py-1 rounded-md transition-all ${
             viewerMode === 'edit_text'
               ? 'bg-blue-600 text-white font-medium shadow-sm ring-1 ring-blue-400'
               : 'text-slate-300 hover:text-white'
@@ -1193,7 +1193,7 @@ export const PDFViewer: React.FC = () => {
 
         <button
           onClick={() => setViewerMode('highlight')}
-          className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-all ${
+          className={`flex items-center space-x-1 px-2.5 py-1 rounded-md transition-all ${
             viewerMode === 'highlight'
               ? 'bg-amber-600 text-white font-medium shadow-sm'
               : 'text-slate-300 hover:text-white'
@@ -1205,8 +1205,8 @@ export const PDFViewer: React.FC = () => {
 
         <button
           onClick={() => setViewerMode('pen')}
-          className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-all ${
-            viewerMode === 'pen' ? 'bg-rose-600 text-white font-medium shadow-sm' : 'text-slate-300 hover:text-white'
+          className={`flex items-center space-x-1 px-2.5 py-1 rounded-md transition-all ${
+            viewerMode === 'pen' ? 'bg-rose-600 text-white font-medium shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
           <PenTool className={`w-3.5 h-3.5 ${viewerMode === 'pen' ? 'text-white' : 'text-rose-400'}`} />
@@ -1215,7 +1215,7 @@ export const PDFViewer: React.FC = () => {
 
         <button
           onClick={() => setViewerMode('redact_draw')}
-          className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-all ${
+          className={`flex items-center space-x-1 px-2.5 py-1 rounded-md transition-all ${
             viewerMode === 'redact_draw'
               ? 'bg-rose-600 text-white font-semibold shadow-sm ring-1 ring-rose-400'
               : 'text-slate-300 hover:text-white'
@@ -1229,7 +1229,7 @@ export const PDFViewer: React.FC = () => {
 
       {/* 正文编辑模式引导提示 */}
       {viewerMode === 'edit_text' && (
-        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 bg-slate-900/90 border border-blue-500/50 text-blue-200 text-xs px-3.5 py-1.5 rounded-full shadow-lg backdrop-blur-md flex items-center space-x-2 animate-in fade-in duration-200">
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 bg-white border border-blue-200 text-slate-800 text-xs px-3.5 py-1.5 rounded-lg shadow-md backdrop-blur-sm flex items-center space-x-2 animate-in fade-in duration-200">
           {isLoadingBlocks ? (
             <>
               <div className="w-2.5 h-2.5 rounded-full border-2 border-blue-400 border-t-transparent animate-spin" />
@@ -1247,7 +1247,7 @@ export const PDFViewer: React.FC = () => {
             </>
           )}
           {pendingEdits.length > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-blue-600/30 text-blue-100 text-[11px] font-medium">
+            <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[11px] font-medium">
               {tr(`${pendingEdits.length} 处待应用`, `${pendingEdits.length} pending`)}
             </span>
           )}
@@ -1263,7 +1263,7 @@ export const PDFViewer: React.FC = () => {
                 ? tr('当前为 PDF.js 回退模式，批量应用需要 Python 环境', 'Batch apply requires the Python sidecar (currently in PDF.js fallback)')
                 : undefined
             }
-            className="ml-1 px-2.5 py-0.5 rounded-full bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] font-medium"
+            className="ml-1 px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] font-medium shadow-xs"
           >
             {tr('应用修改', 'Apply')}
             {pendingEdits.length > 0 ? ` (${pendingEdits.length})` : ''}
@@ -1272,7 +1272,7 @@ export const PDFViewer: React.FC = () => {
             <button
               onClick={() => clearPendingEdits()}
               disabled={isApplyingEdits}
-              className="px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 text-[11px]"
+              className="px-2 py-1 rounded-md bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 text-[11px]"
             >
               {tr('放弃全部', 'Discard all')}
             </button>
@@ -1280,7 +1280,7 @@ export const PDFViewer: React.FC = () => {
           <button
             onClick={exitEditTextMode}
             disabled={isApplyingEdits}
-            className="px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 text-[11px]"
+            className="px-2 py-1 rounded-md bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 text-[11px] font-medium"
           >
             {tr('完成', 'Done')}
           </button>
@@ -1290,7 +1290,7 @@ export const PDFViewer: React.FC = () => {
       {/* 绘制类模式的操作提示 */}
       {(viewerMode === 'highlight' || viewerMode === 'pen' || viewerMode === 'redact_draw') && (
         <div
-          className={`absolute top-14 left-1/2 -translate-x-1/2 z-20 bg-slate-900/90 border text-xs px-3.5 py-1.5 rounded-full shadow-lg backdrop-blur-md flex items-center space-x-2 animate-in fade-in ${
+          className={`absolute top-14 left-1/2 -translate-x-1/2 z-20 bg-white border border-slate-200 text-slate-800 text-xs px-3.5 py-1.5 rounded-lg shadow-md flex items-center space-x-2 animate-in fade-in ${
             viewerMode === 'redact_draw' ? 'border-rose-500/50 text-rose-200' : 'border-amber-500/40 text-amber-100'
           }`}
         >
@@ -1312,7 +1312,7 @@ export const PDFViewer: React.FC = () => {
           )}
           <button
             onClick={() => setViewerMode('view')}
-            className="ml-1 px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px]"
+            className="ml-1 px-2 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px]"
           >
             {tr('完成', 'Done')}
           </button>
@@ -1331,7 +1331,7 @@ export const PDFViewer: React.FC = () => {
       <div
         ref={containerRef}
         data-pdf-viewport
-        className="flex-1 overflow-auto flex px-8 pt-16 pb-10 bg-slate-950/90 relative"
+        className="flex-1 overflow-auto flex px-8 pt-16 pb-10 bg-[#eaedf1] relative"
       >
         <div
           className="pdf-page-shadow rounded overflow-hidden bg-white relative m-auto shrink-0"

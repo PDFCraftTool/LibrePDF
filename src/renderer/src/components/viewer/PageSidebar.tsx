@@ -289,7 +289,7 @@ export const PageSidebar: React.FC<{ pdfDoc: pdfjsLib.PDFDocumentProxy | null }>
         disabled={busy}
         onClick={onClick}
         className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-left text-xs transition-colors disabled:opacity-40 ${
-          opts.danger ? 'text-rose-300 hover:bg-rose-950/60' : 'text-slate-200 hover:bg-slate-800'
+          opts.danger ? 'text-rose-300 hover:bg-rose-950/60' : 'text-slate-200 hover:bg-slate-100'
         }`}
       >
         <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -316,8 +316,8 @@ export const PageSidebar: React.FC<{ pdfDoc: pdfjsLib.PDFDocumentProxy | null }>
   const showOutline = sidebarTab === 'outline'
 
   return (
-    <div className="w-56 bg-slate-900/90 border-r border-slate-800 flex flex-col select-none flex-shrink-0 min-h-0">
-      <div className="px-2 py-1.5 border-b border-slate-800 flex items-center justify-between" role="tablist">
+    <div className="w-56 bg-[#f8fafc] border-r border-slate-200 flex flex-col select-none flex-shrink-0 min-h-0 text-slate-700">
+      <div className="px-2 py-1.5 border-b border-slate-200 flex items-center justify-between bg-slate-50" role="tablist">
         <div className="flex items-center gap-0.5">
           {tabButton('thumbnails', LayoutGrid, tr('页面', 'Pages'))}
           {tabButton('outline', BookMarked, tr('书签', 'Bookmarks'))}
@@ -364,7 +364,7 @@ export const PageSidebar: React.FC<{ pdfDoc: pdfjsLib.PDFDocumentProxy | null }>
           </div>
 
           {/* 底部快捷操作：作用于当前选中的页面 */}
-          <div className="border-t border-slate-800 px-2 py-1.5 flex items-center justify-between">
+          <div className="border-t border-slate-200 px-2 py-1.5 flex items-center justify-between bg-slate-50">
             <span className="text-[10px] text-slate-500 truncate" title={formatPages(selectedPages)}>
               {count > 1 ? tr(`已选 ${count} 页`, `${count} selected`) : tr(`第 ${selectedPages[0] ?? currentPage} 页`, `Page ${selectedPages[0] ?? currentPage}`)}
             </span>
@@ -382,7 +382,7 @@ export const PageSidebar: React.FC<{ pdfDoc: pdfjsLib.PDFDocumentProxy | null }>
                   title={b.label}
                   aria-label={b.label}
                   className={`p-1.5 rounded-md disabled:opacity-40 transition-colors ${
-                    b.danger ? 'text-slate-400 hover:text-rose-300 hover:bg-rose-950/50' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+                    b.danger ? 'text-slate-500 hover:text-rose-600 hover:bg-rose-50' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/60'
                   }`}
                 >
                   <b.icon className="w-3.5 h-3.5" />
@@ -390,7 +390,7 @@ export const PageSidebar: React.FC<{ pdfDoc: pdfjsLib.PDFDocumentProxy | null }>
               ))}
             </div>
           </div>
-          <p className="px-3 pb-2 text-[10px] text-slate-600 leading-snug">
+          <p className="px-3 pb-2 text-[10px] text-slate-400 leading-snug">
             {tr('拖动缩略图调整顺序 · Ctrl/Shift 多选 · 右键更多操作', 'Drag to reorder · Ctrl/Shift to multi-select · Right-click for more')}
           </p>
         </>
@@ -401,7 +401,7 @@ export const PageSidebar: React.FC<{ pdfDoc: pdfjsLib.PDFDocumentProxy | null }>
         <div
           ref={menuRef}
           role="menu"
-          className="fixed z-[80] w-52 bg-slate-900 border border-slate-700/80 rounded-xl shadow-2xl shadow-black/50 p-1.5 animate-in fade-in zoom-in-95"
+          className="fixed z-[80] w-52 bg-white border border-slate-200 rounded-lg shadow-xl p-1 animate-in fade-in zoom-in-95 text-slate-800"
           style={{ left: menu.x, top: menu.y }}
         >
           <div className="px-3 pt-1 pb-1.5 text-[10px] text-slate-500 truncate">
@@ -409,12 +409,12 @@ export const PageSidebar: React.FC<{ pdfDoc: pdfjsLib.PDFDocumentProxy | null }>
           </div>
           {menuItem(RotateCw, tr('向右旋转 90°', 'Rotate right 90°'), () => rotate(90))}
           {menuItem(RotateCcw, tr('向左旋转 90°', 'Rotate left 90°'), () => rotate(-90))}
-          <div className="my-1 h-px bg-slate-800" />
+          <div className="my-1 h-px bg-slate-100" />
           {menuItem(FilePlus2, tr('在前面插入空白页', 'Insert blank page before'), () => insertBlank('before'))}
           {menuItem(FilePlus2, tr('在后面插入空白页', 'Insert blank page after'), () => insertBlank('after'))}
           {menuItem(Copy, tr('复制页面', 'Duplicate'), duplicate)}
           {menuItem(FileOutput, tr('提取为新 PDF…', 'Extract to new PDF…'), extract)}
-          <div className="my-1 h-px bg-slate-800" />
+          <div className="my-1 h-px bg-slate-100" />
           {menuItem(Trash2, tr('删除', 'Delete'), remove, { danger: true, hint: 'Del' })}
         </div>
       )}

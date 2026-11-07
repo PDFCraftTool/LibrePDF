@@ -34,21 +34,28 @@ Most online and commercial PDF software suffer from severe limitations: **intrus
 
 ## 📸 Interface Preview & Visual Showcase
 
-### 1. Modern Workspace with Real Thumbnail Navigation & In-Place Editing
-> High-performance hardware-accelerated viewport, real rasterized page thumbnails, inline text editing, and persistent pen & highlighter overlays.
+### 1. Modern Workspace with Real Thumbnail Navigation
+> Clean, bright native desktop design with high-performance hardware-accelerated viewport, real rasterized page thumbnails, and light segmented controls.
 
 <p align="center">
-  <img src="docs/screenshots/workbench.png" alt="Workspace and In-Place Editing" width="92%" />
+  <img src="docs/screenshots/workbench.png" alt="Clean Modern Workspace" width="92%" />
 </p>
 
-### 2. 53+ Enterprise-Grade Atomic Tool Matrix
+### 2. In-Place Vector Text Editor & Live Layout Alignment
+> Click any text paragraph on the page to edit it in place; the original vector text is cleanly erased and rewritten faithfully with matching typography.
+
+<p align="center">
+  <img src="docs/screenshots/editor-capsule.png" alt="In-Place Text Editor" width="92%" />
+</p>
+
+### 3. 53+ Enterprise-Grade Atomic Tool Matrix
 > Comprehensive utility cockpit providing instant access to all PDF operations with zero configuration.
 
 <p align="center">
   <img src="docs/screenshots/dashboard.png" alt="53+ Atomic Tool Matrix" width="92%" />
 </p>
 
-### 3. Visual DAG Workflow Studio (Node-Based Pipelines)
+### 4. Visual DAG Workflow Studio (Node-Based Pipelines)
 > Chain multiple operations together with an intuitive ComfyUI-like node graph (e.g., Deskew → OCR Sandwich → Redact → Compress → Watermark).
 
 <p align="center">

@@ -55,12 +55,12 @@ const ParamField: React.FC<{
 }> = ({ def, value, onChange }) => {
   const tr = useTr()
   const inputClass =
-    'w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-brand-500 disabled:opacity-50'
+    'w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-blue-500 disabled:opacity-50 shadow-2xs'
   const id = `wf-param-${def.key}`
 
   if (def.type === 'checkbox') {
     return (
-      <label htmlFor={id} className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+      <label htmlFor={id} className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
         <input
           id={id}
           type="checkbox"
@@ -75,7 +75,7 @@ const ParamField: React.FC<{
 
   return (
     <div className="space-y-1">
-      <label htmlFor={id} className="block text-[11px] text-slate-400">
+      <label htmlFor={id} className="block text-[11px] text-slate-600 font-medium">
         {tr(def.label[0], def.label[1])}
       </label>
       {def.type === 'select' ? (
@@ -250,22 +250,22 @@ export const WorkflowModal: React.FC = () => {
             : 'text-slate-400'
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-6 select-none animate-in fade-in duration-200">
-      <div className="w-full h-full max-w-7xl bg-slate-900 border border-slate-700/80 rounded-2xl flex flex-col overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-6 select-none animate-in fade-in duration-150">
+      <div className="w-full h-full max-w-7xl bg-white border border-slate-200 rounded-2xl flex flex-col overflow-hidden shadow-2xl">
         {/* 顶部工具栏 */}
-        <div className="h-14 bg-slate-950 border-b border-slate-800 px-5 flex items-center justify-between gap-4">
+        <div className="h-14 bg-slate-50/90 border-b border-slate-200 px-5 flex items-center justify-between gap-4">
           <div className="flex items-center space-x-3 min-w-0">
-            <div className="p-1.5 rounded-lg bg-purple-950 border border-purple-800/80 text-purple-400">
+            <div className="p-2 rounded-xl bg-blue-600 text-white shadow-xs">
               <Layers className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+              <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
                 {t('workflow.title')}
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-800">
+                <span className="text-[10px] px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 font-medium font-mono">
                   Node Graph DAG
                 </span>
               </h2>
-              <p className="text-[11px] text-slate-400 truncate">{t('workflow.description')}</p>
+              <p className="text-[11px] text-slate-500 truncate">{t('workflow.description')}</p>
             </div>
           </div>
 
@@ -279,20 +279,20 @@ export const WorkflowModal: React.FC = () => {
                 disabled={isRunning}
                 className={
                   tpl.accent
-                    ? 'text-xs px-2.5 py-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 transition-colors disabled:opacity-50'
-                    : 'text-xs px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors disabled:opacity-50'
+                    ? 'text-xs px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-colors disabled:opacity-50 font-medium'
+                    : 'text-xs px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors disabled:opacity-50 shadow-2xs'
                 }
               >
                 {tr(tpl.zh, tpl.en)}
               </button>
             ))}
 
-            <div className="h-4 w-px bg-slate-800 mx-1" />
+            <div className="h-4 w-px bg-slate-200 mx-1" />
 
             {isRunning ? (
               <button
                 onClick={stopWorkflow}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-md transition-colors"
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-xs transition-colors"
               >
                 <Square className="w-3.5 h-3.5 fill-current" />
                 <span>{t('workflow.stop')}</span>
@@ -300,7 +300,7 @@ export const WorkflowModal: React.FC = () => {
             ) : (
               <button
                 onClick={runWorkflow}
-                className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md transition-colors"
+                className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-colors"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
                 <span>{t('workflow.run')}</span>
@@ -310,7 +310,7 @@ export const WorkflowModal: React.FC = () => {
             <button
               onClick={() => setIsOpen(false)}
               aria-label={tr('关闭', 'Close')}
-              className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors ml-2"
+              className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors ml-2"
             >
               <X className="w-5 h-5" />
             </button>
@@ -319,9 +319,9 @@ export const WorkflowModal: React.FC = () => {
 
         <div className="flex-1 flex min-h-0">
           {/* 左侧：节点面板 */}
-          <aside className="w-52 shrink-0 bg-slate-950/80 border-r border-slate-800 flex flex-col min-h-0">
-            <div className="px-3 py-2 border-b border-slate-800 flex items-center gap-1.5 text-[11px] font-semibold text-slate-300">
-              <Plus className="w-3.5 h-3.5 text-brand-400" />
+          <aside className="w-52 shrink-0 bg-slate-50/70 border-r border-slate-200 flex flex-col min-h-0">
+            <div className="px-3 py-2 border-b border-slate-200 flex items-center gap-1.5 text-[11px] font-semibold text-slate-700">
+              <Plus className="w-3.5 h-3.5 text-blue-600" />
               {t('workflow.addNode')}
             </div>
             <div className="flex-1 overflow-y-auto p-2 space-y-1">
@@ -333,16 +333,16 @@ export const WorkflowModal: React.FC = () => {
                     onClick={() => addNode(op)}
                     disabled={isRunning}
                     title={tr(def.description[0], def.description[1])}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-xs text-slate-300 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 hover:border-slate-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
                     style={{ borderLeft: `3px solid ${def.color}` }}
                   >
                     <span aria-hidden>{def.icon}</span>
-                    <span className="truncate">{tr(def.title[0], def.title[1])}</span>
+                    <span className="truncate font-medium">{tr(def.title[0], def.title[1])}</span>
                   </button>
                 )
               })}
             </div>
-            <p className="px-3 py-2 border-t border-slate-800 text-[10px] text-slate-500 leading-snug">
+            <p className="px-3 py-2 border-t border-slate-200 text-[10px] text-slate-500 leading-snug">
               {tr(
                 '新节点会自动连接到选中节点（或最后一个节点）之后。按 Delete / Backspace 删除选中项。',
                 'New nodes auto-connect after the selected (or last) node. Press Delete / Backspace to remove the selection.'
@@ -351,7 +351,7 @@ export const WorkflowModal: React.FC = () => {
           </aside>
 
           {/* 中间核心：React Flow 节点画布 */}
-          <div className="flex-1 relative bg-slate-950 min-w-0">
+          <div className="flex-1 relative bg-[#f8fafc] min-w-0">
             <ReactFlow
               nodes={displayNodes}
               edges={edges}
@@ -359,17 +359,17 @@ export const WorkflowModal: React.FC = () => {
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
               deleteKeyCode={isRunning ? null : ['Delete', 'Backspace']}
-              colorMode="dark"
+              colorMode="light"
               fitView
             >
-              <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#334155" />
-              <Controls className="bg-slate-800 border-slate-700 fill-slate-200" />
+              <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#cbd5e1" />
+              <Controls className="bg-white border-slate-200 fill-slate-700 shadow-xs" />
             </ReactFlow>
 
             {/* 运行中微光状态提示条 */}
             {isRunning && (
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-brand-950/90 border border-brand-500 text-brand-300 px-4 py-2 rounded-full text-xs flex items-center space-x-2 shadow-xl backdrop-blur-md">
-                <Sparkles className="w-4 h-4 animate-spin text-brand-400" />
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-lg text-xs flex items-center space-x-2 shadow-lg">
+                <Sparkles className="w-4 h-4 animate-spin text-amber-200" />
                 <span>
                   {tr('正在按拓扑顺序调度各个 PDF 节点...', 'Running PDF nodes in topological order...')}
                   {currentExecutingNodeId ? ` · ${nodeTitle(currentExecutingNodeId)}` : ''}
@@ -379,21 +379,21 @@ export const WorkflowModal: React.FC = () => {
           </div>
 
           {/* 右侧：参数面板 */}
-          <aside className="w-64 shrink-0 bg-slate-950/80 border-l border-slate-800 flex flex-col min-h-0">
-            <div className="px-3 py-2 border-b border-slate-800 flex items-center gap-1.5 text-[11px] font-semibold text-slate-300">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-brand-400" />
+          <aside className="w-64 shrink-0 bg-slate-50/70 border-l border-slate-200 flex flex-col min-h-0">
+            <div className="px-3 py-2 border-b border-slate-200 flex items-center gap-1.5 text-[11px] font-semibold text-slate-700">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-blue-600" />
               {tr('节点参数', 'Node Parameters')}
             </div>
 
             {selectedNode ? (
               <div className="flex-1 overflow-y-auto p-3 space-y-3 select-text">
-                <div className="rounded-xl border border-slate-800 bg-slate-900 p-2.5">
-                  <div className="text-xs font-semibold text-slate-100 flex items-center gap-1.5">
+                <div className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-2xs">
+                  <div className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
                     <span aria-hidden>{selectedDef?.icon || '❔'}</span>
                     {selectedDef ? tr(selectedDef.title[0], selectedDef.title[1]) : selectedNode.id}
                   </div>
                   {selectedDef && (
-                    <p className="mt-1 text-[10px] text-slate-400 leading-snug">
+                    <p className="mt-1 text-[10px] text-slate-500 leading-snug">
                       {tr(selectedDef.description[0], selectedDef.description[1])}
                     </p>
                   )}
@@ -401,10 +401,10 @@ export const WorkflowModal: React.FC = () => {
                     <p
                       className={`mt-1.5 text-[10px] font-semibold ${
                         nodeStatus[selectedNode.id] === 'success'
-                          ? 'text-emerald-400'
+                          ? 'text-emerald-600'
                           : nodeStatus[selectedNode.id] === 'error'
-                            ? 'text-rose-400'
-                            : 'text-sky-400'
+                            ? 'text-rose-600'
+                            : 'text-blue-600'
                       }`}
                     >
                       {nodeStatus[selectedNode.id] === 'success'
@@ -434,7 +434,7 @@ export const WorkflowModal: React.FC = () => {
                 <button
                   onClick={() => removeNode(selectedNode.id)}
                   disabled={isRunning}
-                  className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-rose-300 bg-rose-950/50 hover:bg-rose-900/60 border border-rose-800/60 transition-colors disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors disabled:opacity-50"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   {tr('删除节点', 'Delete node')}
@@ -442,14 +442,14 @@ export const WorkflowModal: React.FC = () => {
               </div>
             ) : selectedEdge ? (
               <div className="flex-1 p-3 space-y-3">
-                <div className="rounded-xl border border-slate-800 bg-slate-900 p-2.5 text-xs text-slate-300">
-                  <div className="font-semibold text-slate-100 mb-1">{tr('连线', 'Connection')}</div>
+                <div className="rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-700 shadow-2xs">
+                  <div className="font-semibold text-slate-800 mb-1">{tr('连线', 'Connection')}</div>
                   {nodeTitle(selectedEdge.source)} → {nodeTitle(selectedEdge.target)}
                 </div>
                 <button
                   onClick={() => removeEdge(selectedEdge.id)}
                   disabled={isRunning}
-                  className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-rose-300 bg-rose-950/50 hover:bg-rose-900/60 border border-rose-800/60 transition-colors disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors disabled:opacity-50"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   {tr('删除连线', 'Delete connection')}
@@ -464,8 +464,8 @@ export const WorkflowModal: React.FC = () => {
         </div>
 
         {/* 底部：执行状态与实时控制台日志 */}
-        <div className="h-36 bg-slate-950 border-t border-slate-800 flex flex-col">
-          <div className="px-4 py-1.5 border-b border-slate-800/80 bg-slate-900/60 flex items-center justify-between text-[11px] text-slate-400">
+        <div className="h-36 bg-slate-900 border-t border-slate-800 flex flex-col">
+          <div className="px-4 py-1.5 border-b border-slate-800/80 bg-slate-950/60 flex items-center justify-between text-[11px] text-slate-400">
             <div className="flex items-center space-x-1.5">
               <Terminal className="w-3.5 h-3.5 text-slate-400" />
               <span className="font-mono font-semibold">{tr('执行日志与中间产物监视器', 'Execution log & artifacts')}</span>

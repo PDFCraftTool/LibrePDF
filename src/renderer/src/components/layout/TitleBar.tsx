@@ -18,24 +18,24 @@ export const TitleBar: React.FC = () => {
 
   return (
     <div
-        className="h-11 bg-[#0b1112] border-b border-slate-800/80 flex items-center justify-between px-3 select-none"
+      className="h-10 bg-[#f8fafc] border-b border-slate-200/90 flex items-center justify-between px-3 select-none text-slate-700"
       style={{ WebkitAppRegion: 'drag' } as any}
     >
       {/* 软件标识 */}
-      <div className="flex items-center space-x-2 mr-3 px-2">
-        <div className="w-6 h-6 rounded-md bg-gradient-to-br from-brand-500 to-teal-300 flex items-center justify-center shadow-md shadow-brand-950/40">
+      <div className="flex items-center space-x-2 mr-3 px-1">
+        <div className="w-5 h-5 rounded bg-blue-600 flex items-center justify-center shadow-xs">
           <FileText className="w-3.5 h-3.5 text-white" />
         </div>
-        <span className="font-bold text-xs tracking-wider text-slate-200">LIBREPDF</span>
-        <span className="text-[10px] px-1.5 py-0.5 rounded bg-brand-950/80 border border-brand-800/60 text-brand-400 flex items-center gap-1">
-          <ShieldCheck className="w-2.5 h-2.5" />
+        <span className="font-bold text-xs tracking-wider text-slate-800">LIBREPDF</span>
+        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200/70 text-slate-600 flex items-center gap-1 font-medium">
+          <ShieldCheck className="w-2.5 h-2.5 text-emerald-600" />
           Local-First
         </span>
       </div>
 
       {/* 多标签页导航栏 */}
       <div
-        className="flex-1 flex items-center h-full overflow-x-auto no-scrollbar space-x-1"
+        className="flex-1 flex items-end h-full overflow-x-auto no-scrollbar space-x-1"
         role="tablist"
         aria-label={tr('打开的 PDF 文档', 'Open PDF documents')}
         style={{ WebkitAppRegion: 'no-drag' } as any}
@@ -46,7 +46,6 @@ export const TitleBar: React.FC = () => {
             <div
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              // 鼠标中键关闭标签（与浏览器/编辑器习惯一致）
               onAuxClick={(event) => {
                 if (event.button === 1) {
                   event.preventDefault()
@@ -63,18 +62,17 @@ export const TitleBar: React.FC = () => {
                   setActiveTab(tab.id)
                 }
               }}
-              className={`group flex items-center h-8 px-3 rounded-md text-xs transition-colors cursor-pointer border border-transparent max-w-[220px] min-w-[130px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
+              className={`group flex items-center h-[34px] px-3 text-xs transition-all cursor-pointer border-t border-x rounded-t-md max-w-[220px] min-w-[130px] focus-visible:outline-none ${
                 isActive
-                  ? 'bg-slate-800/90 border-slate-700 text-slate-100 font-medium shadow-inner'
-                  : 'bg-slate-950/60 border-transparent text-slate-400 hover:bg-slate-900/60 hover:text-slate-200'
+                  ? 'bg-white border-slate-200 text-slate-900 font-medium shadow-xs relative top-[1px]'
+                  : 'bg-transparent border-transparent text-slate-500 hover:bg-slate-200/60 hover:text-slate-800'
               }`}
             >
-              <FileText className="w-3.5 h-3.5 mr-1.5 flex-shrink-0 text-brand-400" />
+              <FileText className={`w-3.5 h-3.5 mr-1.5 flex-shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
               <span className="truncate flex-1">{tab.fileName}</span>
-              {/* 未保存标记：悬停时切换为关闭按钮 */}
               {tab.isModified && (
                 <span
-                  className="w-2 h-2 rounded-full bg-amber-400 ml-1 shrink-0 group-hover:hidden"
+                  className="w-2 h-2 rounded-full bg-amber-500 ml-1 shrink-0 group-hover:hidden"
                   aria-label={tr('未保存', 'Unsaved')}
                 />
               )}
@@ -83,7 +81,7 @@ export const TitleBar: React.FC = () => {
                   e.stopPropagation()
                   closeTab(tab.id)
                 }}
-                className={`p-1 rounded hover:bg-slate-700 text-slate-400 hover:text-slate-100 ml-1 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 ${
+                className={`p-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 ml-1 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 ${
                   tab.isModified ? 'hidden group-hover:block' : isActive ? 'opacity-70' : 'opacity-0'
                 }`}
                 aria-label={tr(`关闭 ${tab.fileName}`, `Close ${tab.fileName}`)}
@@ -97,7 +95,7 @@ export const TitleBar: React.FC = () => {
 
         <button
           onClick={handleOpenNew}
-          className="p-1.5 shrink-0 text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 rounded-md transition-colors"
+          className="p-1.5 mb-1 shrink-0 text-slate-500 hover:text-slate-800 hover:bg-slate-200/70 rounded transition-colors"
           title={`${t('toolbar.open')} (Ctrl+O)`}
           aria-label={t('toolbar.open')}
         >
@@ -105,7 +103,7 @@ export const TitleBar: React.FC = () => {
         </button>
       </div>
 
-      {/* 预留 Windows titleBarOverlay 窗口按钮区域（最小化/最大化/关闭约 138px），避免标签被遮挡 */}
+      {/* 预留 Windows 窗口按钮区域 */}
       <div className="w-[140px] h-full shrink-0" />
     </div>
   )

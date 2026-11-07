@@ -1584,27 +1584,27 @@ export const BentoToolboxDialog: React.FC = () => {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-6 select-none animate-in fade-in duration-200">
-      <div className="w-full max-w-5xl h-[86vh] bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl flex flex-col overflow-hidden ring-1 ring-white/10">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-6 select-none animate-in fade-in duration-150">
+      <div className="w-full max-w-5xl h-[86vh] bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
         {/* 顶部标题栏 */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/70">
+        <div className="px-6 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
-              <Sparkles className="w-5 h-5 text-amber-300" />
+            <div className="p-2 rounded-xl bg-blue-600 text-white shadow-xs">
+              <Sparkles className="w-5 h-5 text-amber-200" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-base font-bold text-slate-100">
+                <h2 className="text-base font-bold text-slate-800">
                   {tr('全能 PDF 工具箱', 'All-in-One PDF Toolbox')}
                 </h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-950/80 border border-indigo-700/60 text-indigo-300 font-semibold shadow-sm">
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-700 font-medium">
                   {tr(`${tools.length} 款工具`, `${tools.length} tools`)}
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 font-semibold shadow-sm">
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 font-medium">
                   {tr('Clean-Room 自研', 'Clean-Room')}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 {tr(
                   '覆盖 Stirling-PDF、BentoPDF、PDFCraft 的常用功能，并支持正文原地编辑与深度学习双层 OCR',
                   'Covers the common features of Stirling-PDF, BentoPDF and PDFCraft, plus in-place text editing and deep-learning OCR'
@@ -1616,21 +1616,21 @@ export const BentoToolboxDialog: React.FC = () => {
           <div className="flex items-center space-x-3">
             {/* 即时搜索框 */}
             <div className="relative w-64">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={tr('搜索工具（如：压缩、纠偏、拼版、OCR）...', 'Search tools (e.g. compress, deskew, N-up, OCR)...')}
                 aria-label={tr('搜索工具', 'Search tools')}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-xs"
               />
             </div>
 
             <button
               onClick={() => setActiveDialog('none')}
               aria-label={tr('关闭', 'Close')}
-              className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1638,15 +1638,15 @@ export const BentoToolboxDialog: React.FC = () => {
         </div>
 
         {/* 分类过滤器条 */}
-        <div className="px-6 py-2.5 border-b border-slate-800/80 bg-slate-950/40 flex items-center space-x-1.5 overflow-x-auto">
+        <div className="px-6 py-2 border-b border-slate-200 bg-slate-50/50 flex items-center space-x-1 overflow-x-auto">
           {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all ${
                 selectedCategory === cat.id
-                  ? 'bg-indigo-600 text-white font-medium shadow-sm shadow-indigo-600/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'bg-white text-blue-600 font-semibold shadow-xs border border-slate-200'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               {cat.name}
@@ -1657,28 +1657,28 @@ export const BentoToolboxDialog: React.FC = () => {
         {/* 反馈通知条 */}
         {feedbackMsg && (
           <div
-            className={`mx-6 mt-3 px-4 py-2 rounded-xl text-xs flex items-center justify-between border ${
+            className={`mx-6 mt-3 px-4 py-2 rounded-lg text-xs flex items-center justify-between border ${
               feedbackMsg.type === 'success'
-                ? 'bg-emerald-950/30 border-emerald-800/50 text-emerald-300'
-                : 'bg-red-950/30 border-red-800/50 text-red-300'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-red-50 border-red-200 text-red-800'
             }`}
           >
             <div className="flex items-center space-x-2">
               {feedbackMsg.type === 'success' ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               ) : (
-                <AlertCircle className="w-4 h-4 text-red-400" />
+                <AlertCircle className="w-4 h-4 text-red-600" />
               )}
               <span className="whitespace-pre-line select-text">{feedbackMsg.text}</span>
             </div>
-            <button onClick={() => setFeedbackMsg(null)} className="text-slate-400 hover:text-white">
+            <button onClick={() => setFeedbackMsg(null)} className="text-slate-400 hover:text-slate-700">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
 
         {/* 工具卡片网格区 */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 bg-[#f8fafc]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
             {filteredTools.map((tool) => {
               const IconComp = tool.icon
@@ -1686,36 +1686,36 @@ export const BentoToolboxDialog: React.FC = () => {
                 <div
                   key={tool.id}
                   onClick={() => handleToolClick(tool)}
-                  className="group relative flex flex-col justify-between p-4 rounded-2xl bg-slate-950/40 hover:bg-slate-800/50 border border-slate-800/90 hover:border-slate-700 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-xl hover:-translate-y-0.5"
+                  className="group relative flex flex-col justify-between p-4 rounded-xl bg-white hover:bg-blue-50/30 border border-slate-200 hover:border-blue-300 transition-all duration-150 cursor-pointer shadow-xs hover:shadow-md"
                 >
                   <div>
                     <div className="flex items-start justify-between mb-2.5">
                       <div
-                        className={`w-9 h-9 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-white shadow-md`}
+                        className={`w-9 h-9 rounded-lg bg-gradient-to-br ${tool.color} flex items-center justify-center text-white shadow-xs`}
                       >
                         <IconComp className="w-4.5 h-4.5" />
                       </div>
                       <div className="flex items-center space-x-1.5">
                         {tool.badge && (
-                          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700/60">
+                          <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
                             {tool.badge}
                           </span>
                         )}
-                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-blue-600">
                           <ChevronRight className="w-4 h-4" />
                         </span>
                       </div>
                     </div>
 
-                    <h3 className="text-xs font-bold text-slate-200 group-hover:text-indigo-300 transition-colors">
+                    <h3 className="text-xs font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
                       {tool.name}
                     </h3>
-                    <p className="text-[11px] text-slate-400 line-clamp-2 mt-1 leading-relaxed">
+                    <p className="text-[11px] text-slate-500 line-clamp-2 mt-1 leading-relaxed">
                       {tool.desc}
                     </p>
                   </div>
 
-                  <div className="mt-3 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-500">
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
                     <span>
                       {tool.requireDoc
                         ? activeTab
@@ -1723,7 +1723,7 @@ export const BentoToolboxDialog: React.FC = () => {
                           : tr('需打开文档', 'Requires an open document')
                         : tr('无需打开文档', 'Works without a document')}
                     </span>
-                    <span className="text-indigo-400 group-hover:underline font-medium">{tr('点击启动 →', 'Launch →')}</span>
+                    <span className="text-blue-600 group-hover:translate-x-0.5 font-medium transition-transform">{tr('点击启动 →', 'Launch →')}</span>
                   </div>
                 </div>
               )
@@ -1739,16 +1739,16 @@ export const BentoToolboxDialog: React.FC = () => {
         </div>
 
         {/* 底部状态提示条 */}
-        <div className="px-6 py-3 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between text-xs text-slate-400">
+        <div className="px-6 py-2.5 border-t border-slate-200 bg-slate-50/90 flex items-center justify-between text-xs text-slate-500">
           <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
             <span>
               {tr('当前文档：', 'Current document: ')}
-              <strong className="text-slate-200 font-mono">{activeTab ? activeTab.fileName : tr('暂无', 'None')}</strong>
+              <strong className="text-slate-800 font-mono">{activeTab ? activeTab.fileName : tr('暂无', 'None')}</strong>
               {activeTab && tr(` (${activeTab.pageCount} 页)`, ` (${activeTab.pageCount} page(s))`)}
             </span>
           </div>
-          <div className="text-[11px] text-slate-500">
+          <div className="text-[11px] text-slate-400">
             {tr('全部功能均为 Clean-Room 自研实现', 'All features are clean-room implementations')}
           </div>
         </div>
