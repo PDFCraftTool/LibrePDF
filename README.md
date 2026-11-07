@@ -48,11 +48,11 @@ Most online and commercial PDF software suffer from severe limitations: **intrus
   <img src="docs/screenshots/editor-capsule.png" alt="In-Place Text Editor" width="92%" />
 </p>
 
-### 3. 53+ Enterprise-Grade Atomic Tool Matrix
-> Comprehensive utility cockpit providing instant access to all PDF operations with zero configuration.
+### 3. Clean Native Home Dashboard & Quick Launch
+> Clean, bright native desktop start screen featuring drag-and-drop workspace, instant quick-action tools, and one-click access to 53+ clean-room PDF tools.
 
 <p align="center">
-  <img src="docs/screenshots/dashboard.png" alt="53+ Atomic Tool Matrix" width="92%" />
+  <img src="docs/screenshots/dashboard.png" alt="Clean Native Home Dashboard" width="92%" />
 </p>
 
 ### 4. Visual DAG Workflow Studio (Node-Based Pipelines)

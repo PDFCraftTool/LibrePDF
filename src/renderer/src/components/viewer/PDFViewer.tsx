@@ -850,17 +850,18 @@ export const PDFViewer: React.FC = () => {
 
   if (!activeTab) {
     return (
-      <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-950/90 relative select-none">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_18%,rgba(20,184,166,0.10),transparent_54%),linear-gradient(180deg,#0c1415_0%,#080d10_100%)] pointer-events-none" />
+      <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-[#f8fafc] relative select-none">
+        {/* 浅色细致网格质感桌面底纹 */}
+        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:20px_20px] opacity-35 pointer-events-none" />
 
         <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center space-y-7 py-5">
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-400/20 text-brand-200 text-[11px] font-semibold tracking-wide mb-1">
-              <ShieldCheck className="w-3.5 h-3.5" />
+          <div className="text-center space-y-2.5">
+            <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-medium tracking-wide shadow-2xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
               <span>{tr('本地处理 · 文件留在你的设备', 'Processed locally · Files stay on your device')}</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-slate-50">{t('app.name')}</h1>
-            <p className="text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">{t('app.name')}</h1>
+            <p className="text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
               {tr('阅读、整理和处理 PDF。先打开一份文档，常用操作会出现在工具栏中。', 'Read, organize and process PDFs. Open a document and common actions appear in the toolbar.')}
             </p>
           </div>
@@ -892,30 +893,32 @@ export const PDFViewer: React.FC = () => {
               if (filePath) void openDocument(filePath)
               else setDropError(tr('无法读取所拖入文件的位置，请点击打开按钮选择文件。', 'Couldn\'t read the dropped file\'s location. Click to choose the file instead.'))
             }}
-            className={`w-full min-h-48 rounded-2xl p-8 cursor-pointer transition-all duration-200 group flex flex-col items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 ${
+            className={`w-full min-h-48 rounded-2xl p-8 cursor-pointer transition-all duration-200 group flex flex-col items-center justify-center gap-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
               isDragActive
-                ? 'border-2 border-brand-300 bg-brand-500/10 shadow-[0_0_48px_-20px_rgba(45,212,191,0.5)]'
+                ? 'border-2 border-dashed border-blue-500 bg-blue-50/60 shadow-md scale-[1.005]'
                 : 'border-2 border-dashed border-slate-300 bg-white hover:border-blue-500 hover:bg-blue-50/20 shadow-xs'
             }`}
           >
-            <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition-colors">
-              <FileUp className="w-6 h-6" strokeWidth={1.7} />
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 group-hover:scale-105 group-hover:bg-blue-100 transition-all shadow-2xs">
+              <FileUp className="w-6 h-6" strokeWidth={1.75} />
             </div>
             <div className="text-center">
-              <span className="text-base font-semibold text-slate-800 group-hover:text-blue-600 block">
+              <span className="text-base font-semibold text-slate-800 group-hover:text-blue-600 block transition-colors">
                 {isDragActive ? tr('松开鼠标以打开 PDF', 'Release to open the PDF') : tr('打开 PDF 文档', 'Open a PDF')}
               </span>
-              <span className="text-xs text-slate-400 mt-1.5 block">
-                {tr('点击浏览，或将 PDF 拖到此处', 'Click to browse, or drop a PDF here')} <span className="text-slate-500">·</span> Ctrl+O
+              <span className="text-xs text-slate-400 mt-1.5 flex items-center justify-center gap-1.5">
+                <span>{tr('点击浏览，或将 PDF 拖到此处', 'Click to browse, or drop a PDF here')}</span>
+                <span className="text-slate-300">·</span>
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-[10px] font-mono text-slate-500">Ctrl+O</kbd>
               </span>
-              {dropError && <span role="alert" className="text-xs text-rose-300 mt-2 block">{dropError}</span>}
+              {dropError && <span role="alert" className="text-xs text-rose-600 mt-2 block font-medium">{dropError}</span>}
             </div>
           </button>
 
           {/* 全能工具箱矩阵大 Banner 按钮 */}
           <div
             onClick={() => setActiveDialog('toolbox')}
-            className="w-full p-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-400 cursor-pointer transition-all shadow-xs flex items-center justify-between group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="w-full p-4 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-blue-300 cursor-pointer transition-all shadow-xs flex items-center justify-between group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             role="button"
             tabIndex={0}
             onKeyDown={(event) => {
@@ -923,15 +926,15 @@ export const PDFViewer: React.FC = () => {
             }}
           >
             <div className="flex items-center space-x-3.5">
-              <div className="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-300/20 flex items-center justify-center text-brand-200 group-hover:bg-brand-500/15 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition-colors shadow-2xs">
                 <LayoutGrid className="w-5 h-5" />
               </div>
               <div className="text-left">
                 <div className="flex items-center space-x-2">
-                    <span className="font-semibold text-sm text-slate-800 group-hover:text-blue-600 transition-colors">
+                  <span className="font-semibold text-sm text-slate-800 group-hover:text-blue-600 transition-colors">
                     {tr('打开工具箱', 'Open toolbox')}
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-semibold">
+                  <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200/80 text-slate-600 text-[10px] font-semibold">
                     {tr('53+ 款工具', '53+ tools')}
                   </span>
                 </div>
@@ -940,32 +943,32 @@ export const PDFViewer: React.FC = () => {
                 </p>
               </div>
             </div>
-            <span className="text-xs text-blue-600 font-medium group-hover:translate-x-1 transition-transform pr-2">
+            <span className="text-xs text-blue-600 font-medium group-hover:translate-x-1 transition-transform pr-2 flex items-center gap-1">
               {tr('浏览工具箱', 'Browse toolbox')} →
             </span>
           </div>
 
           {/* 新增标杆功能与高频工具直达网格 */}
-          <div className="w-full space-y-2.5">
+          <div className="w-full space-y-3">
             <div className="flex items-center justify-between text-xs px-1">
-              <div className="flex items-center space-x-1.5 font-bold text-slate-300">
-                <Sparkles className="w-3.5 h-3.5 text-brand-400" />
+              <div className="flex items-center space-x-1.5 font-semibold text-slate-700">
+                <Sparkles className="w-4 h-4 text-amber-500" />
                 <span>{tr('常用工具', 'Featured tools')}</span>
               </div>
-              <span className="text-[11px] text-slate-500">{tr('点击卡片选择文件或直接启动', 'Click a card to pick a file or start')}</span>
+              <span className="text-[11px] text-slate-400">{tr('点击卡片选择文件或直接启动', 'Click a card to pick a file or start')}</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {/* 1. PDF 转 Word */}
               <div
                 onClick={handleQuickPdfToWord}
-                className="p-3.5 rounded-xl bg-white border border-slate-200 hover:border-blue-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-blue-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 group-hover:scale-105 transition-transform">
+                  <div className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 group-hover:scale-105 transition-transform">
                     <FileDown className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-200/50 font-semibold">
                     {tr('转 Word', 'To Word')}
                   </span>
                 </div>
@@ -982,13 +985,13 @@ export const PDFViewer: React.FC = () => {
               {/* 2. PDF 转图片 */}
               <div
                 onClick={() => openThenDialog('pdfToImage')}
-                className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-rose-500 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-rose-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 group-hover:scale-105 transition-transform">
+                  <div className="p-2 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 group-hover:scale-105 transition-transform">
                     <FileImage className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200/50 font-semibold">
                     {tr('高清导出', 'High-res')}
                   </span>
                 </div>
@@ -1005,18 +1008,18 @@ export const PDFViewer: React.FC = () => {
               {/* 3. 图片转 PDF */}
               <div
                 onClick={() => setActiveDialog('imagesToPdf')}
-                className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-pink-500 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-pink-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-pink-500/10 text-pink-400 border border-pink-500/20 group-hover:scale-105 transition-transform">
+                  <div className="p-2 rounded-lg bg-pink-50 text-pink-600 border border-pink-100 group-hover:scale-105 transition-transform">
                     <Images className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-pink-50 text-pink-600 border border-pink-200/50 font-semibold">
                     {tr('全格式', 'All formats')}
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-200 group-hover:text-pink-300 transition-colors">
+                  <h4 className="text-xs font-semibold text-slate-800 group-hover:text-pink-600 transition-colors">
                     {tr('图片批量转 PDF', 'Images to PDF')}
                   </h4>
                   <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
@@ -1028,13 +1031,13 @@ export const PDFViewer: React.FC = () => {
               {/* 4. 大纲书签目录编辑器 */}
               <div
                 onClick={handleQuickTocEditor}
-                className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-purple-500 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-purple-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 group-hover:scale-105 transition-transform">
+                  <div className="p-2 rounded-lg bg-purple-50 text-purple-600 border border-purple-100 group-hover:scale-105 transition-transform">
                     <ListTree className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 border border-purple-200/50 font-semibold">
                     {tr('大纲树', 'Outline')}
                   </span>
                 </div>
@@ -1051,13 +1054,13 @@ export const PDFViewer: React.FC = () => {
               {/* 5. 数字签名与验签 */}
               <div
                 onClick={handleQuickDigitalSign}
-                className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-emerald-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:scale-105 transition-transform">
+                  <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 group-hover:scale-105 transition-transform">
                     <FileSignature className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200/50 font-semibold">
                     {tr('P12 证书', 'P12 certificate')}
                   </span>
                 </div>
@@ -1074,13 +1077,13 @@ export const PDFViewer: React.FC = () => {
               {/* 6. 表单设计器 */}
               <div
                 onClick={handleQuickFormDesigner}
-                className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-indigo-500 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-indigo-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 group-hover:scale-105 transition-transform">
+                  <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 group-hover:scale-105 transition-transform">
                     <CheckSquare className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 border border-indigo-200/50 font-semibold">
                     {tr('设计器', 'Designer')}
                   </span>
                 </div>
@@ -1097,13 +1100,13 @@ export const PDFViewer: React.FC = () => {
               {/* 7. 按空白页自动切分 */}
               <div
                 onClick={handleQuickSplitByBlank}
-                className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-amber-500 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-amber-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 group-hover:scale-105 transition-transform">
+                  <div className="p-2 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 group-hover:scale-105 transition-transform">
                     <Scissors className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-200/50 font-semibold">
                     {tr('自动切分', 'Auto split')}
                   </span>
                 </div>
@@ -1120,13 +1123,13 @@ export const PDFViewer: React.FC = () => {
               {/* 8. 整页文字朝向自动旋转回正 */}
               <div
                 onClick={handleQuickAutoRotate}
-                className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-cyan-500 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-cyan-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 group-hover:scale-105 transition-transform">
+                  <div className="p-2 rounded-lg bg-cyan-50 text-cyan-600 border border-cyan-100 group-hover:scale-105 transition-transform">
                     <Compass className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-50 text-cyan-600 border border-cyan-200/50 font-semibold">
                     {tr('自动回正', 'Auto-straighten')}
                   </span>
                 </div>
@@ -1143,13 +1146,13 @@ export const PDFViewer: React.FC = () => {
               {/* 9. 双文档比对 */}
               <div
                 onClick={() => setActiveDialog('compare')}
-                className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-teal-500 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-teal-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-teal-500/10 text-teal-400 border border-teal-500/20 group-hover:scale-105 transition-transform">
+                  <div className="p-2 rounded-lg bg-teal-50 text-teal-600 border border-teal-100 group-hover:scale-105 transition-transform">
                     <GitCompare className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-teal-50 text-teal-600 border border-teal-200/50 font-semibold">
                     {tr('差异标红', 'Highlight diffs')}
                   </span>
                 </div>
@@ -1166,18 +1169,18 @@ export const PDFViewer: React.FC = () => {
               {/* 10. 网页 URL / HTML 转高保真 PDF */}
               <div
                 onClick={() => setActiveDialog('htmlToPdf')}
-                className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-sky-500 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-sky-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 group-hover:scale-105 transition-transform">
+                  <div className="p-2 rounded-lg bg-sky-50 text-sky-600 border border-sky-100 group-hover:scale-105 transition-transform">
                     <Globe className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-600 border border-sky-200/50 font-semibold">
                     {tr('网页转 PDF', 'Web to PDF')}
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-200 group-hover:text-sky-300 transition-colors">
+                  <h4 className="text-xs font-semibold text-slate-800 group-hover:text-sky-600 transition-colors">
                     {tr('网页 URL / HTML 转 PDF', 'Web page URL / HTML to PDF')}
                   </h4>
                   <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
@@ -1189,13 +1192,13 @@ export const PDFViewer: React.FC = () => {
               {/* 11. 复杂表格导出为 Excel */}
               <div
                 onClick={() => openThenDialog('tableExtract')}
-                className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-emerald-500 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-emerald-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:scale-105 transition-transform">
+                  <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 group-hover:scale-105 transition-transform">
                     <FileSpreadsheet className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200/50 font-semibold">
                     {tr('转 Excel', 'To Excel')}
                   </span>
                 </div>
@@ -1212,18 +1215,18 @@ export const PDFViewer: React.FC = () => {
               {/* 12. 仿真实体扫描件效果 */}
               <div
                 onClick={() => openThenDialog('scanner')}
-                className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-yellow-500 hover:bg-slate-900 transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-sm"
+                className="p-3.5 rounded-xl bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-amber-400 hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 group-hover:scale-105 transition-transform">
+                  <div className="p-2 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 group-hover:scale-105 transition-transform">
                     <ScanLine className="w-4 h-4" />
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-300 font-semibold">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-200/50 font-semibold">
                     {tr('扫描质感', 'Scan look')}
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-200 group-hover:text-yellow-300 transition-colors">
+                  <h4 className="text-xs font-semibold text-slate-800 group-hover:text-amber-600 transition-colors">
                     {tr('模拟扫描件效果', 'Simulated scan effect')}
                   </h4>
                   <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
@@ -1235,28 +1238,34 @@ export const PDFViewer: React.FC = () => {
           </div>
 
           {/* 底部三大保障徽标 */}
-          <div className="grid grid-cols-3 gap-3 w-full pt-1">
-            <div className="bg-white border border-slate-200 shadow-xs rounded-xl p-3 text-left flex items-center space-x-2.5">
-              <ShieldCheck className="w-4 h-4 text-brand-400 shrink-0" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full pt-1">
+            <div className="bg-white border border-slate-200 shadow-2xs rounded-xl p-3 text-left flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              </div>
               <div>
-                <span className="text-xs font-medium text-slate-800 block">{tr('离线运行', 'Works offline')}</span>
-                <span className="text-[10px] text-slate-500">{tr('无网络遥测，可商用', 'No telemetry, safe for commercial use')}</span>
+                <span className="text-xs font-semibold text-slate-800 block">{tr('离线运行', 'Works offline')}</span>
+                <span className="text-[11px] text-slate-500">{tr('无网络遥测，安全可靠', 'No telemetry, safe and secure')}</span>
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200 shadow-xs rounded-xl p-3 text-left flex items-center space-x-2.5">
-              <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
+            <div className="bg-white border border-slate-200 shadow-2xs rounded-xl p-3 text-left flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-lg bg-cyan-50 border border-cyan-100 flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4 text-cyan-600" />
+              </div>
               <div>
-                <span className="text-xs font-medium text-slate-800 block">{tr('AI 智能助手', 'AI Copilot')}</span>
-                <span className="text-[10px] text-slate-500">{tr('连接本地 Ollama，用自然语言操作', 'Local Ollama, plain-language commands')}</span>
+                <span className="text-xs font-semibold text-slate-800 block">{tr('AI 智能助手', 'AI Copilot')}</span>
+                <span className="text-[11px] text-slate-500">{tr('连接本地 Ollama，自然语言操作', 'Local Ollama, plain-language commands')}</span>
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200 shadow-xs rounded-xl p-3 text-left flex items-center space-x-2.5">
-              <LayoutTemplate className="w-4 h-4 text-purple-400 shrink-0" />
+            <div className="bg-white border border-slate-200 shadow-2xs rounded-xl p-3 text-left flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0">
+                <LayoutTemplate className="w-4 h-4 text-purple-600" />
+              </div>
               <div>
-                <span className="text-xs font-medium text-slate-800 block">{tr('可视化连线工作流', 'Visual workflows')}</span>
-                <span className="text-[10px] text-slate-500">{tr('基于节点的批处理流水线', 'Node-based batch pipelines')}</span>
+                <span className="text-xs font-semibold text-slate-800 block">{tr('可视化连线工作流', 'Visual workflows')}</span>
+                <span className="text-[11px] text-slate-500">{tr('基于节点的批处理流水线', 'Node-based batch pipelines')}</span>
               </div>
             </div>
           </div>
