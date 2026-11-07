@@ -229,35 +229,35 @@ export const ToolBar: React.FC = () => {
   return (
     <div
       ref={menuContainerRef}
-      className="min-h-11 h-auto bg-white border-b border-slate-200/90 px-3 py-1 flex items-center justify-between gap-2 select-none shadow-xs text-xs relative z-30 text-slate-700"
+      className="h-10 min-h-10 max-h-10 bg-white border-b border-slate-200/90 px-2.5 flex items-center justify-between gap-2 select-none shadow-xs text-xs relative z-30 text-slate-700 flex-nowrap overflow-x-auto overflow-y-hidden"
     >
       {/* 左侧：文件操作与分类菜单 */}
-      <div className="min-w-0 flex-1 flex flex-wrap items-center gap-x-1 gap-y-1">
+      <div className="flex items-center space-x-1 flex-nowrap shrink-0">
         <button
           onClick={toggleSidebar}
-          className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
+          className="p-1.5 rounded-md hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
           title={showSidebar ? tr('折叠侧边栏', 'Hide sidebar') : tr('展开侧边栏', 'Show sidebar')}
         >
           {showSidebar ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
         </button>
 
-        <div className="h-4 w-px bg-slate-200 mx-1" />
+        <div className="h-4 w-px bg-slate-200 mx-0.5" />
 
         {/* 打开 */}
         <button
           onClick={handleOpen}
-          className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-slate-700 hover:text-slate-900 transition-colors font-medium"
+          className="p-1.5 rounded-md hover:bg-slate-100 text-slate-700 hover:text-slate-900 transition-colors font-medium"
           title={tr('打开 PDF 文件 (Ctrl+O)', 'Open PDF file (Ctrl+O)')}
+          aria-label={t('toolbar.open')}
         >
-          <FolderOpen className="w-4 h-4 text-amber-400 shrink-0" />
-          <span className="hidden xl:inline">{t('toolbar.open')}</span>
+          <FolderOpen className="w-4 h-4 text-amber-500 shrink-0" />
         </button>
 
         {/* 原地保存 (Ctrl+S) */}
         <button
           disabled={!activeTab}
           onClick={handleSave}
-          className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all font-medium disabled:opacity-30 ${
+          className={`p-1.5 rounded-md transition-all font-medium disabled:opacity-30 relative ${
             activeTab?.isModified
               ? 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
               : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900'
@@ -267,11 +267,11 @@ export const ToolBar: React.FC = () => {
               ? tr('有未保存的修改 (Ctrl+S)', 'Unsaved changes (Ctrl+S)')
               : tr('保存当前文档 (Ctrl+S)', 'Save document (Ctrl+S)')
           }
+          aria-label={tr('保存', 'Save')}
         >
           <Save className={`w-4 h-4 shrink-0 ${activeTab?.isModified ? 'text-blue-600' : 'text-slate-400'}`} />
-          <span className="hidden xl:inline">{tr('保存', 'Save')}</span>
           {activeTab?.isModified && (
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block" />
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 absolute top-1 right-1" />
           )}
         </button>
 
@@ -279,18 +279,18 @@ export const ToolBar: React.FC = () => {
         <button
           disabled={!activeTab}
           onClick={saveCurrentDocumentAs}
-          className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-30 text-slate-600 hover:text-slate-900 transition-colors font-medium"
+          className="p-1.5 rounded-md hover:bg-slate-100 disabled:opacity-30 text-slate-600 hover:text-slate-900 transition-colors font-medium"
           title={tr('另存为新文件... (Ctrl+Shift+S)', 'Save as new file... (Ctrl+Shift+S)')}
+          aria-label={tr('另存为', 'Save As')}
         >
-          <Download className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span className="hidden xl:inline">{tr('另存为', 'Save As')}</span>
+          <Download className="w-4 h-4 text-emerald-500 shrink-0" />
         </button>
 
         {/* 撤销 / 重做 */}
         <button
           disabled={!activeTab || activeTab.historyIndex <= 0}
           onClick={() => void undo()}
-          className="p-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-30 text-slate-600 hover:text-slate-900 transition-colors"
+          className="p-1.5 rounded-md hover:bg-slate-100 disabled:opacity-30 text-slate-600 hover:text-slate-900 transition-colors"
           title={tr('撤销 (Ctrl+Z)', 'Undo (Ctrl+Z)')}
           aria-label={tr('撤销', 'Undo')}
         >
@@ -299,14 +299,14 @@ export const ToolBar: React.FC = () => {
         <button
           disabled={!activeTab || activeTab.historyIndex >= activeTab.history.length - 1}
           onClick={() => void redo()}
-          className="p-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-30 text-slate-600 hover:text-slate-900 transition-colors"
+          className="p-1.5 rounded-md hover:bg-slate-100 disabled:opacity-30 text-slate-600 hover:text-slate-900 transition-colors"
           title={tr('重做 (Ctrl+Y)', 'Redo (Ctrl+Y)')}
           aria-label={tr('重做', 'Redo')}
         >
           <Redo2 className="w-4 h-4" />
         </button>
 
-        <div className="h-4 w-px bg-slate-200 mx-1" />
+        <div className="h-4 w-px bg-slate-200 mx-0.5" />
 
         {/* 分类下拉菜单 1：页面排版 */}
         <div className="relative">
@@ -315,11 +315,11 @@ export const ToolBar: React.FC = () => {
             onMouseEnter={() => openMenu && openMenu !== 'pages' && setOpenMenu('pages')}
             aria-haspopup="menu"
             aria-expanded={openMenu === 'pages'}
-            className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg font-medium transition-colors ${
+            className={`flex items-center space-x-1 px-2 py-1 rounded-md font-medium transition-colors ${
               openMenu === 'pages' ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            <Layers className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+            <Layers className="w-3.5 h-3.5 text-blue-500 shrink-0" />
             <span>{tr('页面排版', 'Pages')}</span>
             <ChevronDown className="w-3 h-3 text-slate-400" />
           </button>
@@ -434,11 +434,11 @@ export const ToolBar: React.FC = () => {
             onMouseEnter={() => openMenu && openMenu !== 'convert' && setOpenMenu('convert')}
             aria-haspopup="menu"
             aria-expanded={openMenu === 'convert'}
-            className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg font-medium transition-colors ${
+            className={`flex items-center space-x-1 px-2 py-1 rounded-md font-medium transition-colors ${
               openMenu === 'convert' ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            <FileDown className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <FileDown className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
             <span>{tr('格式互转', 'Convert')}</span>
             <ChevronDown className="w-3 h-3 text-slate-400" />
           </button>
@@ -527,12 +527,12 @@ export const ToolBar: React.FC = () => {
             onMouseEnter={() => openMenu && openMenu !== 'security' && setOpenMenu('security')}
             aria-haspopup="menu"
             aria-expanded={openMenu === 'security'}
-            className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg font-medium transition-colors ${
+            className={`flex items-center space-x-1 px-2 py-1 rounded-md font-medium transition-colors ${
               openMenu === 'security' ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            <ShieldAlert className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-            <span>{tr('安全与签署', 'Security & Signing')}</span>
+            <ShieldAlert className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+            <span>{tr('安全与签署', 'Security')}</span>
             <ChevronDown className="w-3 h-3 text-slate-400" />
           </button>
 
@@ -623,11 +623,11 @@ export const ToolBar: React.FC = () => {
             onMouseEnter={() => openMenu && openMenu !== 'advanced' && setOpenMenu('advanced')}
             aria-haspopup="menu"
             aria-expanded={openMenu === 'advanced'}
-            className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg font-medium transition-colors ${
+            className={`flex items-center space-x-1 px-2 py-1 rounded-md font-medium transition-colors ${
               openMenu === 'advanced' ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            <ScanText className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            <ScanText className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
             <span>{tr('智能与高级', 'Advanced')}</span>
             <ChevronDown className="w-3 h-3 text-slate-400" />
           </button>
@@ -878,16 +878,16 @@ export const ToolBar: React.FC = () => {
       )}
 
       {/* 右侧：标杆矩阵直达、AI 智能体与工作流 */}
-      <div className="flex items-center space-x-2 shrink-0">
+      <div className="flex items-center space-x-1.5 shrink-0 ml-auto">
         {/* Bento & Stirling 全能工具箱矩阵入口 */}
         <button
           onClick={() => setActiveDialog('toolbox')}
-          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-xs transition-colors"
+          className="flex items-center space-x-1 px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-xs transition-colors"
           title={tr('打开工具箱（53+ 款工具，涵盖 Stirling-PDF 与 BentoPDF 功能）', 'Open toolbox (53+ tools covering Stirling-PDF and BentoPDF features)')}
         >
           <LayoutGrid className="w-3.5 h-3.5 text-white" />
-          <span className="hidden xl:inline">{tr('工具箱', 'Toolbox')}</span>
-          <span className="text-[10px] px-1.5 py-0.2 bg-blue-500 text-white rounded font-bold shadow-sm">
+          <span className="hidden sm:inline">{tr('工具箱', 'Toolbox')}</span>
+          <span className="text-[10px] px-1 py-0.2 bg-blue-500 text-white rounded font-bold">
             53+
           </span>
         </button>
@@ -895,21 +895,21 @@ export const ToolBar: React.FC = () => {
         {/* 工作流画布 */}
         <button
           onClick={toggleWorkflow}
-          className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all shadow-sm ${
+          className={`flex items-center space-x-1 px-2 py-1 rounded-md transition-all shadow-xs ${
             isWorkflowOpen
               ? 'bg-blue-50 text-blue-700 border border-blue-300 font-medium'
               : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 font-medium'
           }`}
           title={tr('打开可视化节点工作流编排画布', 'Open the visual workflow canvas')}
         >
-          <Workflow className="w-3.5 h-3.5 text-purple-400" />
-          <span className="hidden xl:inline">{tr('工作流', 'Workflow')}</span>
+          <Workflow className="w-3.5 h-3.5 text-purple-500" />
+          <span className="hidden sm:inline">{tr('工作流', 'Workflow')}</span>
         </button>
 
         {/* 本地 AI 智能体 */}
         <button
           onClick={toggleAI}
-          className={`relative flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg transition-all shadow-sm ${
+          className={`relative flex items-center space-x-1 px-2 py-1 rounded-md transition-all shadow-xs ${
             isAIOpen
               ? 'bg-blue-50 text-blue-700 border border-blue-300 font-medium'
               : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 font-medium'
@@ -917,9 +917,9 @@ export const ToolBar: React.FC = () => {
           title={tr('打开本地优先的 AI Copilot 助手', 'Open the local-first AI Copilot')}
         >
           <Bot className="w-3.5 h-3.5 text-slate-600" />
-          <span className="hidden xl:inline">{tr('AI 助手', 'AI Copilot')}</span>
+          <span className="hidden sm:inline">{tr('AI 助手', 'AI Copilot')}</span>
           {isOllamaOnline && (
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block ml-0.5" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block ml-0.5" />
           )}
         </button>
 
@@ -927,7 +927,7 @@ export const ToolBar: React.FC = () => {
         {activeTab && (
           <button
             onClick={() => setActiveDialog('info')}
-            className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-slate-800 transition-colors"
+            className="p-1 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors"
             title={t('toolbar.docInfo')}
           >
             <Info className="w-3.5 h-3.5" />
@@ -937,7 +937,7 @@ export const ToolBar: React.FC = () => {
         {/* 语言切换 */}
         <button
           onClick={toggleLanguage}
-          className="flex items-center space-x-1 px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors"
+          className="flex items-center space-x-1 px-2 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors"
           title={tr('切换到英文 / Switch to English', '切换到中文 / Switch to Chinese')}
           aria-label={tr('切换语言', 'Switch language')}
         >
