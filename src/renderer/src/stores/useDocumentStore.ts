@@ -72,7 +72,8 @@ export type ActiveDialog =
   | 'formDesigner'
   | 'digitalSign'
   | 'pdfToImage'
-export type ViewerMode = 'view' | 'edit_text' | 'highlight' | 'draw_rect' | 'pen' | 'redact_draw'
+export type ViewerMode = 'view' | 'edit_text' | 'highlight' | 'draw_rect' | 'pen' | 'redact_draw' | 'fill_sign' | 'crop'
+export type ReadingTheme = 'default' | 'sepia' | 'dark'
 
 interface DocumentState {
   tabs: DocumentTab[]
@@ -81,6 +82,8 @@ interface DocumentState {
   sidebarTab: 'thumbnails' | 'outline' | 'info'
   activeDialog: ActiveDialog
   viewerMode: ViewerMode
+  readingTheme: ReadingTheme
+  setReadingTheme: (theme: ReadingTheme) => void
   pageTextBlocks: any[]
   isLoadingBlocks: boolean
   pendingEdits: TextEditItem[]
@@ -121,6 +124,8 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   sidebarTab: 'thumbnails',
   activeDialog: 'none',
   viewerMode: 'view',
+  readingTheme: 'default',
+  setReadingTheme: (theme) => set({ readingTheme: theme }),
   pageTextBlocks: [],
   isLoadingBlocks: false,
   pendingEdits: [],

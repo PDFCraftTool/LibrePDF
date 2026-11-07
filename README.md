@@ -80,6 +80,16 @@ Most online and commercial PDF software suffer from severe limitations: **intrus
 - **Immediate In-Place Results**: Operations update directly in the center viewport canvas with real-time feedback—no annoying save dialogs interrupting your workflow.
 - **Smart Staging**: Edit and preview freely, and hit `Ctrl+S` when you're satisfied.
 
+### ✍️ Fill & Sign Studio (Inspired by Modern Acrobat & PdfCraft)
+- **Click-to-Type Everywhere**: Type arbitrary text, names, numbers, or addresses directly on flattened PDF pages with instant font size and corporate color selection.
+- **Instant Checkmarks & Stamps**: One-click placement of checkmarks (`✓`), cross marks (`✗`), selection dots (`●`), and current system date stamps (`YYYY-MM-DD`).
+- **Local Saved Signatures**: Draw and save your signature or initials on the smooth canvas; stamp them onto contracts with drag-and-resize handles anytime.
+- **One-Click Flatten & Burn**: Burn all filled inputs and signatures permanently into the PDF vector/raster stream with clean undo/redo support.
+
+### 👓 Eye-Care Reading Themes & Visual Crop
+- **Hardware-Accelerated Reading Modes**: Seamlessly toggle between **Default Light**, **Eye-Care Warm Sepia** (`#fbf0d9`), and **Night Dark Mode** without re-rendering or quality loss.
+- **Visual Page Crop**: Interactive visual crop box to remove white margins and unwanted borders with lossless ISO 32000 `CropBox` geometry updates.
+
 ---
 
 ## 🧰 Full Feature Matrix (53+ Capabilities)

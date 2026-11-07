@@ -54,7 +54,9 @@ import {
   Maximize,
   Undo2,
   Redo2,
-  Search
+  Search,
+  Sun,
+  Moon
 } from 'lucide-react'
 
 export const ToolBar: React.FC = () => {
@@ -63,6 +65,8 @@ export const ToolBar: React.FC = () => {
   const {
     tabs,
     activeTabId,
+    readingTheme,
+    setReadingTheme,
     openDocument,
     setCurrentPage,
     setScale,
@@ -836,6 +840,39 @@ export const ToolBar: React.FC = () => {
             aria-label={tr('搜索', 'Search')}
           >
             <Search className="w-3.5 h-3.5" />
+          </button>
+
+          <div className="h-3.5 w-px bg-slate-200 mx-0.5" />
+
+          {/* 护眼与深色阅读模式 */}
+          <button
+            onClick={() => {
+              if (readingTheme === 'default') setReadingTheme('sepia')
+              else if (readingTheme === 'sepia') setReadingTheme('dark')
+              else setReadingTheme('default')
+            }}
+            className={`p-1 rounded transition-colors ${
+              readingTheme === 'sepia'
+                ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                : readingTheme === 'dark'
+                ? 'bg-slate-800 text-amber-300 hover:bg-slate-700'
+                : 'text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+            }`}
+            title={
+              readingTheme === 'default'
+                ? tr('当前：标准明亮阅读（点击切换为护眼羊皮纸）', 'Theme: Default (Click for Warm Sepia)')
+                : readingTheme === 'sepia'
+                ? tr('当前：羊皮纸护眼阅读（点击切换为暗夜夜读）', 'Theme: Warm Sepia (Click for Night Dark)')
+                : tr('当前：暗夜夜读阅读（点击恢复标准明亮）', 'Theme: Night Dark (Click for Default)')
+            }
+          >
+            {readingTheme === 'default' ? (
+              <Sun className="w-3.5 h-3.5" />
+            ) : readingTheme === 'sepia' ? (
+              <BookOpen className="w-3.5 h-3.5" />
+            ) : (
+              <Moon className="w-3.5 h-3.5" />
+            )}
           </button>
         </div>
       )}

@@ -445,6 +445,16 @@ function setupIpcHandlers() {
   })
 
   // 2. 读取 PDF 文件
+  ipcMain.handle('file:writeBinary', async (_, targetPath: string, data: Uint8Array) => {
+    try {
+      if (!isPathAllowedForWrite(targetPath)) return { success: false, error: '路径不被允许' }
+      await fs.promises.writeFile(targetPath, Buffer.from(data))
+      return { success: true }
+    } catch (err: any) {
+      return { success: false, error: err.message || '写入二进制文件失败' }
+    }
+  })
+
   ipcMain.handle('pdf:read', async (_, filePath: string) => {
     return await pdfService.getMetadata(filePath)
   })

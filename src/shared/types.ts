@@ -336,6 +336,7 @@ export interface IElectronAPI {
   getTempPdfPath: (prefix?: string) => Promise<string>
   saveCurrentFile: (tempPath: string, targetPath: string) => Promise<{ success: boolean; error?: string }>
   writeTextFile: (targetPath: string, contents: string) => Promise<{ success: boolean; error?: string }>
+  writeBinaryFile: (targetPath: string, data: Uint8Array) => Promise<{ success: boolean; error?: string }>
   getDroppedFilePath: (file: File) => string
   showItemInFolder: (targetPath: string) => Promise<boolean>
   getPdfjsAsset: (kind: 'cmaps' | 'standard_fonts', name: string) => Promise<Uint8Array>

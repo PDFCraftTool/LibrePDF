@@ -9,6 +9,7 @@ const electronAPI: IElectronAPI = {
   getTempPdfPath: (prefix) => ipcRenderer.invoke('file:getTempPdfPath', prefix),
   saveCurrentFile: (tempPath, targetPath) => ipcRenderer.invoke('file:saveCurrentFile', tempPath, targetPath),
   writeTextFile: (targetPath, contents) => ipcRenderer.invoke('file:writeText', targetPath, contents),
+  writeBinaryFile: (targetPath, data) => ipcRenderer.invoke('file:writeBinary', targetPath, data),
   getDroppedFilePath: (file) => webUtils.getPathForFile(file),
   showItemInFolder: (targetPath) => ipcRenderer.invoke('shell:showItemInFolder', targetPath),
   getPdfjsAsset: (kind, name) => ipcRenderer.invoke('pdfjs:asset', kind, name),

@@ -39,6 +39,11 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useTr } from '../../i18n'
 import { PageSidebar } from './PageSidebar'
+import { FillSignToolbar } from './FillSignToolbar'
+import { FillSignOverlay } from './FillSignOverlay'
+import { VisualCropOverlay } from './VisualCropOverlay'
+import { useFillSignStore } from '../../stores/useFillSignStore'
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import { PdfTextLayer } from './PdfTextLayer'
 import { usePdfSearch, PdfSearchBar } from './PdfSearch'
 
@@ -54,6 +59,7 @@ export const PDFViewer: React.FC = () => {
     setCurrentPage,
     viewerMode,
     setViewerMode,
+    readingTheme,
     pageTextBlocks,
     isLoadingBlocks,
     fetchPageTextBlocks,
@@ -73,6 +79,101 @@ export const PDFViewer: React.FC = () => {
   const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const renderTaskRef = useRef<any>(null)
+
+  // Fill & Sign 固化至 PDF
+  const [isFlatteningFillSign, setIsFlatteningFillSign] = useState(false)
+  const handleFlattenFillSign = async () => {
+    if (!activeTab) return
+    const { items, clearItems } = useFillSignStore.getState()
+    const pageItems = items.filter((it) => it.page === activeTab.currentPage)
+    if (pageItems.length === 0) {
+      toast.info(tr('本页没有未固化的填表项', 'No fill & sign items to flatten on this page'))
+      return
+    }
+
+    setIsFlatteningFillSign(true)
+    try {
+      const pdfDoc = await PDFDocument.load(activeTab.data)
+      const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica)
+      const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+
+      const pageIndex = activeTab.currentPage - 1
+      const page = pdfDoc.getPage(pageIndex)
+      const { width, height } = page.getSize()
+
+      for (const item of pageItems) {
+        const x = item.xRatio * width
+        const itemSize = item.fontSize || 14
+        const y = height - (item.yRatio * height) - itemSize
+
+        let colorRgb = rgb(0, 0, 0)
+        if (item.color === '#1d4ed8') colorRgb = rgb(0.11, 0.31, 0.85)
+        else if (item.color === '#dc2626') colorRgb = rgb(0.86, 0.15, 0.15)
+
+        if (item.type === 'text' || item.type === 'date') {
+          const text = item.text || ''
+          if (text.trim()) {
+            page.drawText(text, {
+              x,
+              y,
+              size: itemSize,
+              font: helvetica,
+              color: colorRgb
+            })
+          }
+        } else if (item.type === 'check') {
+          page.drawText('✓', {
+            x,
+            y,
+            size: itemSize * 1.3,
+            font: helveticaBold,
+            color: colorRgb
+          })
+        } else if (item.type === 'cross') {
+          page.drawText('✗', {
+            x,
+            y,
+            size: itemSize * 1.3,
+            font: helveticaBold,
+            color: colorRgb
+          })
+        } else if (item.type === 'dot') {
+          page.drawCircle({
+            x: x + itemSize / 3,
+            y: y + itemSize / 3,
+            size: itemSize / 3,
+            color: colorRgb
+          })
+        } else if (item.type === 'signature' && item.signatureDataUrl) {
+          const pngImg = await pdfDoc.embedPng(item.signatureDataUrl)
+          const sigW = (item.widthRatio || 0.22) * width
+          const sigH = (item.heightRatio || 0.08) * height
+          page.drawImage(pngImg, {
+            x,
+            y: height - (item.yRatio * height) - sigH,
+            width: sigW,
+            height: sigH
+          })
+        }
+      }
+
+      const outBytes = await pdfDoc.save()
+      const tempPath = await window.electronAPI.getTempPdfPath('fillsign')
+      const writeRes = await window.electronAPI.writeBinaryFile(tempPath, outBytes)
+      if (!writeRes.success) throw new Error(writeRes.error || 'Failed to save binary')
+
+      await useDocumentStore.getState().applyModifiedPDF(tempPath)
+      clearItems()
+      toast.success(
+        tr('已成功烘焙固化至 PDF 正文', 'Successfully flattened into PDF'),
+        tr('支持按 Ctrl+Z 撤销，按 Ctrl+S 覆盖保存', 'Press Ctrl+Z to undo, Ctrl+S to save')
+      )
+    } catch (err: any) {
+      toast.error(tr('烘焙固化失败', 'Failed to flatten into PDF'), err.message)
+    } finally {
+      setIsFlatteningFillSign(false)
+    }
+  }
 
   // 正文原地编辑状态
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null)
@@ -1225,7 +1326,42 @@ export const PDFViewer: React.FC = () => {
           <ShieldAlert className={`w-3.5 h-3.5 ${viewerMode === 'redact_draw' ? 'text-white' : 'text-rose-400'}`} />
           <span>{tr('画框脱敏', 'Redact area')}</span>
         </button>
-      </div>
+
+        <button
+          onClick={() => setViewerMode('fill_sign')}
+          className={`flex items-center space-x-1 px-2.5 py-1 rounded-md transition-all ${
+            viewerMode === 'fill_sign'
+              ? 'bg-blue-600 text-white font-medium shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+          }`}
+          title={tr('快速填表、打勾、加盖日期与手写签名 (Fill & Sign)', 'Quick fill form, checkmarks, date and signature (Fill & Sign)')}
+        >
+          <PenTool className={`w-3.5 h-3.5 ${viewerMode === 'fill_sign' ? 'text-white' : 'text-blue-600'}`} />
+          <span>{tr('填表与签名', 'Fill & Sign')}</span>
+        </button>
+
+        <button
+          onClick={() => setViewerMode('crop')}
+          className={`flex items-center space-x-1 px-2.5 py-1 rounded-md transition-all ${
+            viewerMode === 'crop'
+              ? 'bg-blue-600 text-white font-medium shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+          }`}
+          title={tr('可视页面盒白边裁剪', 'Visual crop page margins')}
+        >
+          <Scissors className={`w-3.5 h-3.5 ${viewerMode === 'crop' ? 'text-white' : 'text-slate-600'}`} />
+          <span>{tr('裁剪', 'Crop')}</span>
+        </button>      </div>
+
+      {/* Fill & Sign 填表与签章辅助条 */}
+      {viewerMode === 'fill_sign' && (
+        <FillSignToolbar onFlatten={handleFlattenFillSign} isFlattening={isFlatteningFillSign} />
+      )}
+
+      {/* 可视裁剪辅助条 */}
+      {viewerMode === 'crop' && pageViewport && (
+        <VisualCropOverlay pageViewport={pageViewport} />
+      )}
 
       {/* 正文编辑模式引导提示 */}
       {viewerMode === 'edit_text' && (
@@ -1334,7 +1470,7 @@ export const PDFViewer: React.FC = () => {
         className="flex-1 overflow-auto flex px-8 pt-16 pb-10 bg-[#eaedf1] relative"
       >
         <div
-          className="pdf-page-shadow rounded overflow-hidden bg-white relative m-auto shrink-0"
+          className={`pdf-page-shadow rounded overflow-hidden bg-white relative m-auto shrink-0 transition-colors duration-150 ${readingTheme === "sepia" ? "pdf-theme-sepia" : readingTheme === "dark" ? "pdf-theme-dark" : ""}`}
           style={{
             width: pageViewport ? `${pageViewport.width}px` : 'auto',
             height: pageViewport ? `${pageViewport.height}px` : 'auto'
@@ -1351,6 +1487,11 @@ export const PDFViewer: React.FC = () => {
             interactive={viewerMode === 'view'}
             highlights={search.pageHighlights}
           />
+
+          {/* Fill & Sign 交互覆盖层 */}
+          {viewerMode === 'fill_sign' && pageViewport && (
+            <FillSignOverlay pageViewport={pageViewport} currentPage={activeTab.currentPage} />
+          )}
 
           {/* 交互绘制覆盖层 Canvas (高亮/画笔/脱敏) */}
           <canvas

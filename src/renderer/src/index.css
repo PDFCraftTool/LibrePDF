@@ -188,3 +188,19 @@ select:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Reading Themes for PDF Canvas */
+.pdf-theme-sepia canvas {
+  filter: sepia(0.35) contrast(0.95) brightness(0.98);
+}
+.pdf-theme-sepia {
+  background-color: #fbf0d9 !important;
+}
+
+.pdf-theme-dark canvas {
+  filter: invert(0.9) hue-rotate(180deg) contrast(0.95);
+}
+.pdf-theme-dark {
+  background-color: #1e293b !important;
+}
+

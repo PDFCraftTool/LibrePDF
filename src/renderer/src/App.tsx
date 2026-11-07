@@ -35,6 +35,7 @@ import { AttachmentDialog } from './components/dialogs/AttachmentDialog'
 import { FormDesignerDialog } from './components/dialogs/FormDesignerDialog'
 import { DigitalSignDialog } from './components/dialogs/DigitalSignDialog'
 import { PdfToImageDialog } from './components/dialogs/PdfToImageDialog'
+import { SignaturePadDialog } from './components/dialogs/SignaturePadDialog'
 
 export const App: React.FC = () => {
   const activeDialog = useDocumentStore((s) => s.activeDialog)
@@ -125,6 +126,7 @@ export const App: React.FC = () => {
       <FormDesignerDialog />
       <DigitalSignDialog />
       <PdfToImageDialog />
+      <SignaturePadDialog />
       </React.Fragment>
 
       {/* 应用内参数询问框（位于所有弹窗之上） */}
