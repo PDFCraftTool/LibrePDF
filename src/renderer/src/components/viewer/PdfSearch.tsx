@@ -178,7 +178,7 @@ export const PdfSearchBar: React.FC<{ search: SearchState }> = ({ search }) => {
 
   return (
     <div
-      className="absolute top-3 right-4 z-30 flex items-center gap-1 bg-slate-900/95 border border-slate-700/80 rounded-xl pl-2.5 pr-1 py-1 shadow-2xl backdrop-blur-md text-xs animate-in fade-in slide-in-from-top-2"
+      className="absolute top-3 right-4 z-30 flex items-center gap-1 bg-white/95 border border-slate-200 rounded-xl pl-2.5 pr-1 py-1 shadow-lg backdrop-blur-md text-xs animate-in fade-in slide-in-from-top-2 text-slate-800"
       role="search"
     >
       <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -200,22 +200,22 @@ export const PdfSearchBar: React.FC<{ search: SearchState }> = ({ search }) => {
         }}
         placeholder={tr('在文档中搜索', 'Search in document')}
         aria-label={tr('在文档中搜索', 'Search in document')}
-        className="w-48 bg-transparent text-slate-100 placeholder-slate-500 focus:outline-none px-1 py-1"
+        className="w-48 bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none px-1 py-1"
       />
       <span
         className={`min-w-[52px] text-right font-mono text-[11px] ${
-          hasQuery && !search.isSearching && search.matches.length === 0 ? 'text-rose-300' : 'text-slate-400'
+          hasQuery && !search.isSearching && search.matches.length === 0 ? 'text-rose-600 font-medium' : 'text-slate-500'
         }`}
         aria-live="polite"
       >
         {search.isSearching ? <Loader2 className="w-3.5 h-3.5 animate-spin inline" aria-label={tr('搜索中', 'Searching')} /> : null}
         {status}
       </span>
-      <div className="h-4 w-px bg-slate-700 mx-1" />
+      <div className="h-4 w-px bg-slate-200 mx-1" />
       <button
         onClick={search.prev}
         disabled={search.matches.length === 0}
-        className="p-1 rounded-lg hover:bg-slate-800 disabled:opacity-30 text-slate-300"
+        className="p-1 rounded-lg hover:bg-slate-100 disabled:opacity-30 text-slate-600 hover:text-slate-900"
         title={tr('上一个 (Shift+Enter)', 'Previous (Shift+Enter)')}
         aria-label={tr('上一个', 'Previous')}
       >
@@ -224,7 +224,7 @@ export const PdfSearchBar: React.FC<{ search: SearchState }> = ({ search }) => {
       <button
         onClick={search.next}
         disabled={search.matches.length === 0}
-        className="p-1 rounded-lg hover:bg-slate-800 disabled:opacity-30 text-slate-300"
+        className="p-1 rounded-lg hover:bg-slate-100 disabled:opacity-30 text-slate-600 hover:text-slate-900"
         title={tr('下一个 (Enter)', 'Next (Enter)')}
         aria-label={tr('下一个', 'Next')}
       >

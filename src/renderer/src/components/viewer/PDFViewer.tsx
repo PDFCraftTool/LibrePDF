@@ -1292,12 +1292,12 @@ export const PDFViewer: React.FC = () => {
           onClick={() => setViewerMode('edit_text')}
           className={`flex items-center space-x-1 px-2.5 py-1 rounded-md transition-all ${
             viewerMode === 'edit_text'
-              ? 'bg-blue-600 text-white font-medium shadow-sm ring-1 ring-blue-400'
-              : 'text-slate-300 hover:text-white'
+              ? 'bg-blue-600 text-white font-medium shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
           title={tr('点击页面上任何文本块直接修改正文', 'Click any text block on the page to edit it')}
         >
-          <Type className={`w-3.5 h-3.5 ${viewerMode === 'edit_text' ? 'text-white' : 'text-blue-400'}`} />
+          <Type className={`w-3.5 h-3.5 ${viewerMode === 'edit_text' ? 'text-white' : 'text-blue-600'}`} />
           <span>{tr('正文编辑', 'Edit text')}</span>
         </button>
 
@@ -1305,11 +1305,11 @@ export const PDFViewer: React.FC = () => {
           onClick={() => setViewerMode('highlight')}
           className={`flex items-center space-x-1 px-2.5 py-1 rounded-md transition-all ${
             viewerMode === 'highlight'
-              ? 'bg-amber-600 text-white font-medium shadow-sm'
-              : 'text-slate-300 hover:text-white'
+              ? 'bg-amber-600 text-white font-medium shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
-          <Highlighter className={`w-3.5 h-3.5 ${viewerMode === 'highlight' ? 'text-white' : 'text-amber-400'}`} />
+          <Highlighter className={`w-3.5 h-3.5 ${viewerMode === 'highlight' ? 'text-white' : 'text-amber-500'}`} />
           <span>{tr('划词高亮', 'Highlight')}</span>
         </button>
 
@@ -1327,12 +1327,12 @@ export const PDFViewer: React.FC = () => {
           onClick={() => setViewerMode('redact_draw')}
           className={`flex items-center space-x-1 px-2.5 py-1 rounded-md transition-all ${
             viewerMode === 'redact_draw'
-              ? 'bg-rose-600 text-white font-semibold shadow-sm ring-1 ring-rose-400'
-              : 'text-slate-300 hover:text-white'
+              ? 'bg-rose-600 text-white font-semibold shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
           title={tr('在页面上框选区域进行永久脱敏', 'Select an area on the page to redact it permanently')}
         >
-          <ShieldAlert className={`w-3.5 h-3.5 ${viewerMode === 'redact_draw' ? 'text-white' : 'text-rose-400'}`} />
+          <ShieldAlert className={`w-3.5 h-3.5 ${viewerMode === 'redact_draw' ? 'text-white' : 'text-rose-500'}`} />
           <span>{tr('画框脱敏', 'Redact area')}</span>
         </button>
 
@@ -1614,10 +1614,10 @@ export const PDFViewer: React.FC = () => {
 
       {/* 批量应用进度遮罩：锁定全部交互 */}
       {isApplyingEdits && (
-        <div className="absolute inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-slate-900 border border-slate-700 rounded-xl px-6 py-4 flex items-center space-x-3 shadow-2xl">
+        <div className="absolute inset-0 z-50 bg-slate-900/20 backdrop-blur-2xs flex items-center justify-center">
+          <div className="bg-white border border-slate-200 rounded-xl px-6 py-4 flex items-center space-x-3 shadow-xl text-slate-800">
             <div className="w-4 h-4 rounded-full border-2 border-blue-400 border-t-transparent animate-spin" />
-            <span className="text-sm text-slate-200">
+            <span className="text-sm text-slate-800">
               {tr('正在应用文字修改…', 'Applying text edits…')}
             </span>
           </div>
